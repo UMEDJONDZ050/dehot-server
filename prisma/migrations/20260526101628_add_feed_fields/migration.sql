@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "products" ADD COLUMN     "clickCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "isVip" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "vipUntil" TIMESTAMP(3);

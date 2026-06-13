@@ -1,0 +1,205 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(uuid())
+  phone       String    @unique
+  name        String
+  password    String
+  avatar      String?
+  bio         String?
+  city        String?
+  district    String?
+  region      String?
+  role        UserRole  @default(BOTH)
+  latitude    Float?
+  longitude   Float?
+  fcmToken    String?
+  isVerified  Boolean   @default(false)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  products    Product[]
+  favorites   Favorite[]
+  sentMessages    Message[]   @relation("SentMessages")
+  chatsAsBuyer    Chat[]      @relation("BuyerChats")
+  chatsAsSeller   Chat[]      @relation("SellerChats")
+  complaints      Complaint[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  BUYER
+  SELLER
+  BOTH
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  icon        String?
+  color       String?
+  sortOrder   Int       @default(0)
+
+  products    Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id                String        @id @default(uuid())
+  title             String
+  description       String
+  categoryId        String
+  sellerId          String
+  basePrice         Float
+  unit              String
+  availableQty      Int
+  isOrganic         Boolean       @default(false)
+  isFresh           Boolean       @default(false)
+  location          String?
+  district          String?
+  region            String?
+  status            ProductStatus @default(ACTIVE)
+  aiScanned         Boolean       @default(false)
+  viewCount         Int           @default(0)
+  clickCount        Int           @default(0)
+  isVip             Boolean       @default(false)
+  vipUntil          DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  category          Category      @relation(fields: [categoryId], references: [id])
+  seller            User          @relation(fields: [sellerId], references: [id])
+  images            ProductImage[]
+  wholesaleTiers    WholesaleTier[]
+  favorites         Favorite[]
+  chats             Chat[]
+  views             ProductView[]
+  complaints        Complaint[]
+
+  @@map("products")
+}
+
+model ProductView {
+  id        String   @id @default(uuid())
+  productId String
+  viewerKey String
+  createdAt DateTime @default(now())
+
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, viewerKey])
+  @@map("product_views")
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+  SOLD
+}
+
+model ProductImage {
+  id        String   @id @default(uuid())
+  productId String
+  url       String
+  isMain    Boolean  @default(false)
+  sortOrder Int      @default(0)
+
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+model WholesaleTier {
+  id          String   @id @default(uuid())
+  productId   String
+  minQty      Int
+  maxQty      Int?
+  price       Float
+
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("wholesale_tiers")
+}
+
+model Favorite {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("favorites")
+}
+
+model Chat {
+  id        String    @id @default(uuid())
+  buyerId   String
+  sellerId  String
+  productId String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  buyer     User      @relation("BuyerChats",  fields: [buyerId],   references: [id])
+  seller    User      @relation("SellerChats", fields: [sellerId],  references: [id])
+  product   Product?  @relation(fields: [productId], references: [id])
+  messages  Message[]
+
+  @@map("chats")
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  chatId    String
+  senderId  String
+  text      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender    User     @relation("SentMessages", fields: [senderId], references: [id])
+
+  @@map("messages")
+}
+
+model Complaint {
+  id          String   @id @default(uuid())
+  userId      String?
+  productId   String
+  text        String
+  source      String   @default("user") // "user" | "ai"
+  createdAt   DateTime @default(now())
+
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("complaints")
+}
+
+model Banner {
+  id         String   @id @default(uuid())
+  title      String?
+  subtitle   String?
+  imageUrl   String?
+  linkType   String   @default("none")  // "whatsapp" | "url" | "none"
+  linkValue  String?
+  isActive   Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("banners")
+}

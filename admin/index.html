@@ -1,0 +1,1999 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEHOT — Админ Панел</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #2d6a4f;
+      --primary-dark: #1b4332;
+      --primary-light: #52b788;
+      --accent: #40916c;
+      --bg: #f0f4f2;
+      --card: #ffffff;
+      --border: #e2e8e4;
+      --text: #1a2e1f;
+      --muted: #6b7c71;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --warning: #d97706;
+      --warning-light: #fef3c7;
+      --info: #2563eb;
+      --info-light: #dbeafe;
+      --sidebar-w: 240px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Login ── */
+    #loginScreen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--accent) 100%);
+    }
+
+    .login-box {
+      background: white;
+      border-radius: 20px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    .login-logo {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -1px;
+      margin-bottom: 4px;
+    }
+
+    .login-sub {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 36px;
+    }
+
+    .login-box h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+
+    .form-group {
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 15px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    .form-group input:focus { border-color: var(--primary); }
+
+    .login-err {
+      background: var(--danger-light);
+      color: var(--danger);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* ── Layout ── */
+    #adminPanel { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--primary-dark);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .sidebar-logo .logo-text {
+      font-size: 22px;
+      font-weight: 800;
+      color: white;
+      letter-spacing: -0.5px;
+    }
+
+    .sidebar-logo .logo-sub {
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 2px;
+    }
+
+    .nav-section {
+      padding: 12px 12px 0;
+      flex: 1;
+    }
+
+    .nav-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.35);
+      padding: 12px 8px 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.15s;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
+    .nav-item.active { background: rgba(255,255,255,0.15); color: white; font-weight: 600; }
+
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    .sidebar-footer {
+      padding: 16px 12px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.55);
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+
+    .logout-btn:hover { background: rgba(220,38,38,0.15); color: #fca5a5; }
+
+    /* Main content */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .online-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--success-light);
+      color: var(--success);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); }
+
+    .content-area {
+      padding: 28px;
+      flex: 1;
+    }
+
+    /* ── Pages ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* Stats cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stat-icon svg { width: 22px; height: 22px; }
+
+    .stat-icon.green { background: var(--success-light); color: var(--success); }
+    .stat-icon.blue  { background: var(--info-light);    color: var(--info); }
+    .stat-icon.amber { background: var(--warning-light); color: var(--warning); }
+    .stat-icon.red   { background: var(--danger-light);  color: var(--danger); }
+
+    .stat-info .stat-val {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .stat-info .stat-lbl {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Cards / Tables */
+    .card {
+      background: white;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-header h3 {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .search-input {
+      padding: 8px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      width: 220px;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus { border-color: var(--primary); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    thead th {
+      background: #f8faf9;
+      padding: 11px 16px;
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f8faf9; }
+
+    td {
+      padding: 12px 16px;
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .badge-green   { background: var(--success-light); color: var(--success); }
+    .badge-red     { background: var(--danger-light);  color: var(--danger); }
+    .badge-amber   { background: var(--warning-light); color: var(--warning); }
+    .badge-blue    { background: var(--info-light);    color: var(--info); }
+    .badge-gray    { background: #f1f5f9; color: #64748b; }
+
+    .action-btn {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.15s;
+    }
+
+    .action-btn:hover { opacity: 0.8; }
+    .btn-del   { background: var(--danger-light); color: var(--danger); }
+    .btn-tog   { background: var(--info-light); color: var(--info); }
+    .btn-status { background: var(--warning-light); color: var(--warning); }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .pg-btns { display: flex; gap: 6px; }
+
+    .pg-btn {
+      padding: 5px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+
+    .pg-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+    .pg-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .pg-btn.current { background: var(--primary); color: white; border-color: var(--primary); }
+
+    /* Avatar */
+    .av {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: var(--success-light);
+      color: var(--success);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    /* Product thumb */
+    .thumb {
+      width: 40px; height: 40px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: var(--bg);
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+
+    /* ── Role filter tabs ── */
+    .role-tab {
+      padding: 7px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      background: white;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all 0.15s;
+    }
+    .role-tab:hover { border-color: var(--primary); color: var(--primary); }
+    .role-tab.active { background: var(--primary); border-color: var(--primary); color: white; font-weight: 600; }
+
+    /* ── Role city picker ── */
+    .rc-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 12px; cursor: pointer; font-size: 13px;
+      border-bottom: 1px solid var(--border); transition: background 0.1s;
+    }
+    .rc-item:hover { background: var(--bg); }
+    .rc-item.selected { background: var(--success-light); color: var(--primary); font-weight: 600; }
+    .rc-item:last-child { border-bottom: none; }
+
+    /* ── Broadcast target cards ── */
+    .target-card {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: white;
+      user-select: none;
+    }
+    .target-card:hover { border-color: var(--primary-light); background: var(--success-light); }
+    .target-card.active { border-color: var(--primary); background: #f0faf4; }
+    .tc-icon { font-size: 22px; margin-bottom: 5px; }
+    .tc-label { font-size: 13px; font-weight: 700; color: var(--text); }
+    .tc-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .target-card.active .tc-label { color: var(--primary); }
+
+    .empty-state {
+      text-align: center;
+      padding: 56px 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* Recent tables grid */
+    .recent-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: var(--text);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 999;
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: var(--success); }
+    .toast.error   { background: var(--danger); }
+
+    /* Confirm modal */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 200;
+      display: none;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      width: 360px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .modal h4 { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+    .modal p  { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+    .btn-cancel {
+      padding: 9px 18px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .btn-confirm-del {
+      padding: 9px 18px;
+      border: none;
+      border-radius: 8px;
+      background: var(--danger);
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+    }
+
+    .select-status {
+      padding: 5px 8px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* ── Banner management ── */
+    .banners-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 16px;
+    }
+
+    .banner-card {
+      background: white;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .banner-card-img {
+      width: 100%;
+      height: 140px;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .banner-card-img img { width: 100%; height: 140px; object-fit: cover; display: block; }
+
+    .banner-card-body { padding: 12px 14px 8px; }
+
+    .banner-card-title {
+      font-size: 14px; font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+
+    .banner-card-sub {
+      font-size: 12px; color: var(--muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 10px; min-height: 16px;
+    }
+
+    .banner-card-meta { display: flex; gap: 5px; flex-wrap: wrap; }
+
+    .banner-card-actions {
+      display: flex; gap: 8px;
+      padding: 10px 14px 14px;
+      border-top: 1px solid var(--border);
+      margin-top: 10px;
+    }
+
+    .btn-edit { background: var(--info-light); color: var(--info); }
+
+    /* Banner form modal */
+    .bm-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+    }
+    .bm-overlay.open { display: flex; }
+
+    .bm-modal {
+      background: white;
+      border-radius: 20px;
+      width: 520px;
+      max-width: 95vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .bm-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; background: white; z-index: 1;
+    }
+    .bm-header h3 { font-size: 17px; font-weight: 700; }
+    .bm-close { background: none; border: none; cursor: pointer; font-size: 22px; color: var(--muted); line-height: 1; padding: 0 4px; }
+    .bm-close:hover { color: var(--danger); }
+
+    .bm-body { padding: 20px 24px; }
+
+    .bm-image-area {
+      width: 100%; height: 160px;
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; position: relative; overflow: hidden;
+      margin-bottom: 20px; background: var(--bg);
+      transition: border-color 0.2s;
+    }
+    .bm-image-area:hover { border-color: var(--primary); }
+    .bm-image-area img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+    .bm-change-label {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.4); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .bm-image-area:hover .bm-change-label { opacity: 1; }
+
+    .bm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .bm-link-row { display: grid; grid-template-columns: 160px 1fr; gap: 12px; }
+
+    .bm-field { margin-bottom: 14px; }
+    .bm-field label {
+      display: block; font-size: 11px; font-weight: 700;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px;
+      margin-bottom: 7px;
+    }
+    .bm-field input, .bm-field select {
+      width: 100%; padding: 9px 13px;
+      border: 2px solid var(--border); border-radius: 8px;
+      font-size: 14px; font-family: inherit; outline: none;
+      transition: border-color 0.2s;
+    }
+    .bm-field input:focus, .bm-field select:focus { border-color: var(--primary); }
+
+    .bm-toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0 4px; border-top: 1px solid var(--border); margin-top: 4px;
+    }
+
+    .toggle-sw {
+      width: 44px; height: 24px; background: var(--border);
+      border-radius: 12px; position: relative; cursor: pointer; transition: background 0.2s;
+    }
+    .toggle-sw.on { background: var(--primary); }
+    .toggle-knob {
+      width: 18px; height: 18px; background: white; border-radius: 50%;
+      position: absolute; top: 3px; left: 3px;
+      transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .toggle-sw.on .toggle-knob { left: 23px; }
+
+    .bm-footer {
+      padding: 14px 24px 20px; border-top: 1px solid var(--border);
+      display: flex; gap: 10px; justify-content: flex-end;
+      position: sticky; bottom: 0; background: white;
+    }
+
+    .btn-save {
+      padding: 10px 26px; background: var(--primary); color: white;
+      border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: background 0.2s;
+    }
+    .btn-save:hover { background: var(--primary-dark); }
+    .btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .add-banner-btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 18px; background: var(--primary); color: white;
+      border: none; border-radius: 9px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: background 0.2s;
+    }
+    .add-banner-btn:hover { background: var(--primary-dark); }
+
+    .banners-header {
+      background: white; border-radius: 14px; border: 1px solid var(--border);
+      padding: 16px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .banners-header h3 { font-size: 15px; font-weight: 700; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════ LOGIN ═══════════ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">🌾 DEHOT</div>
+    <div class="login-sub">Бозори маҳсулоти кишоварзии Тоҷикистон</div>
+    <h2>Вуруди Админ</h2>
+    <div class="login-err" id="loginErr"></div>
+    <div class="form-group">
+      <label>Рамзи маҳрамӣ</label>
+      <input type="password" id="secretInput" placeholder="Рамзро ворид кунед…" onkeydown="if(event.key==='Enter')doLogin()" />
+    </div>
+    <button class="btn-primary" onclick="doLogin()" id="loginBtn">Ворид шудан</button>
+  </div>
+</div>
+
+<!-- ═══════════ ADMIN PANEL ═══════════ -->
+<div id="adminPanel" style="display:none">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">🌾 DEHOT</div>
+      <div class="logo-sub">Admin Panel</div>
+    </div>
+
+    <nav class="nav-section">
+      <div class="nav-label">Асосӣ</div>
+      <div class="nav-item active" onclick="showPage('dashboard',this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-width="2"/></svg>
+        Дошбод
+      </div>
+      <div class="nav-label">Идора</div>
+      <div class="nav-item" onclick="showPage('users',this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4" stroke-width="2"/><path stroke-width="2" d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Корбарон
+        <span id="usersCountBadge" style="margin-left:auto;background:rgba(255,255,255,0.15);padding:2px 8px;border-radius:20px;font-size:11px;"></span>
+      </div>
+      <div class="nav-item" onclick="showPage('products',this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path stroke-width="2" d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+        Маҳсулотҳо
+        <span id="prodsCountBadge" style="margin-left:auto;background:rgba(255,255,255,0.15);padding:2px 8px;border-radius:20px;font-size:11px;"></span>
+      </div>
+      <div class="nav-item" onclick="showPage('banners',this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="8" width="20" height="12" rx="2" stroke-width="2"/><path stroke-width="2" d="M7 8V6a2 2 0 012-2h6a2 2 0 012 2v2"/></svg>
+        Банерҳо
+        <span id="bannersCountBadge" style="margin-left:auto;background:rgba(255,255,255,0.15);padding:2px 8px;border-radius:20px;font-size:11px;"></span>
+      </div>
+      <div class="nav-item" onclick="showPage('broadcast',this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M22 2L11 13M22 2L15 22l-4-9-9-4 19-7z"/></svg>
+        Паёми умумӣ
+      </div>
+      <div class="nav-item" onclick="showPage('ai',this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 2a10 10 0 100 20A10 10 0 0012 2z"/><path stroke-width="2" d="M12 8v4l3 3"/></svg>
+        AI Модератсия
+      </div>
+      <div class="nav-item" onclick="showPage('complaints',this)">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13" stroke-width="2"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-width="2"/></svg>
+        Шикоятҳо
+        <span id="complaintsCountBadge" style="margin-left:auto;background:rgba(220,38,38,0.2);color:#fca5a5;padding:2px 8px;border-radius:20px;font-size:11px;"></span>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="logout-btn" onclick="doLogout()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        Аз ҳисоб баромад
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="pageTitle">Дошбод</div>
+      <div class="topbar-right">
+        <div class="online-badge">
+          <div class="dot"></div>
+          <span id="onlineBadge">0 онлайн</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-area">
+
+      <!-- ── Dashboard ── -->
+      <div class="page active" id="page-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon green">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4" stroke-width="2"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-val" id="s-users">—</div>
+              <div class="stat-lbl">Ҳамаи корбарон</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon blue">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-width="2" d="M12 6v6l4 2"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-val" id="s-online">—</div>
+              <div class="stat-lbl">Онлайн (30 дақ)</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon amber">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path stroke-width="2" d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-val" id="s-prods">—</div>
+              <div class="stat-lbl">Маҳсулотҳо</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon red">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-val" id="s-msgs">—</div>
+              <div class="stat-lbl">Сӯҳбатҳо</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="recent-grid">
+          <div class="card">
+            <div class="card-header"><h3>Корбарони охирин</h3></div>
+            <div id="recentUsersTable"><div class="loading">Бор мешавад…</div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Маҳсулотҳои охирин</h3></div>
+            <div id="recentProdsTable"><div class="loading">Бор мешавад…</div></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Users ── -->
+      <div class="page" id="page-users">
+        <div class="card">
+          <div class="card-header">
+            <h3 id="usersTitle">Ҳамаи корбарон</h3>
+            <input class="search-input" id="userSearch" placeholder="Ҷустуҷӯ…" oninput="debouncedUserSearch()" />
+          </div>
+          <!-- Role filter tabs -->
+          <div style="display:flex;gap:8px;padding:0 20px 14px;border-bottom:1px solid var(--border)">
+            <button class="role-tab active" id="rtab-all"     onclick="setRoleFilter('all',   this)">👥 Ҳама</button>
+            <button class="role-tab"        id="rtab-sellers" onclick="setRoleFilter('SELLER', this)">🏪 Фурушандагон</button>
+            <button class="role-tab"        id="rtab-buyers"  onclick="setRoleFilter('BUYER',  this)">🛒 Харидорон</button>
+          </div>
+          <div id="usersTableWrap"><div class="loading">Бор мешавад…</div></div>
+          <div class="pagination" id="usersPager" style="display:none">
+            <span id="usersInfo"></span>
+            <div class="pg-btns" id="usersPgBtns"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Products ── -->
+      <div class="page" id="page-products">
+        <div class="card">
+          <div class="card-header">
+            <h3>Ҳамаи маҳсулотҳо</h3>
+            <input class="search-input" id="prodSearch" placeholder="Ҷустуҷӯ…" oninput="debouncedProdSearch()" />
+          </div>
+          <div id="prodsTableWrap"><div class="loading">Бор мешавад…</div></div>
+          <div class="pagination" id="prodsPager" style="display:none">
+            <span id="prodsInfo"></span>
+            <div class="pg-btns" id="prodsPgBtns"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Banners ── -->
+      <div class="page" id="page-banners">
+        <div class="banners-header">
+          <h3>Банерҳои барнома</h3>
+          <button class="add-banner-btn" onclick="openBannerModal()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>
+            Банер илова
+          </button>
+        </div>
+        <div id="bannersGrid" class="banners-grid">
+          <div class="loading">Бор мешавад…</div>
+        </div>
+      </div>
+
+      <!-- ── AI Moderation ── -->
+      <div class="page" id="page-ai">
+        <div class="card">
+          <div class="card-header">
+            <h3>🤖 AI Ёрдамчи</h3>
+            <span style="font-size:12px;color:var(--muted)">Дар бораи барнома, элонҳо ё корбарон пурсед</span>
+          </div>
+          <div id="aiChatMessages" style="height:420px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--bg);border-bottom:1px solid var(--border)">
+            <div style="align-self:flex-start;background:white;border:1px solid var(--border);border-radius:12px;padding:10px 14px;max-width:80%;font-size:13px">
+              Салом! Ман AI-ёрдамчии DEHOT ҳастам. Ба шумо дар бораи элонҳо, корбарон, шикоятҳо ва барнома кӯмак мекунам. Чӣ пурсед?
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;padding:14px 16px">
+            <input id="aiChatInput" type="text" placeholder="Паёмро нависед…"
+              style="flex:1;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;outline:none"
+              onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"
+              onkeydown="if(event.key==='Enter')sendAiChat()" />
+            <button onclick="sendAiChat()" id="aiChatBtn"
+              style="padding:11px 20px;background:var(--primary);color:white;border:none;border-radius:10px;cursor:pointer;font-family:inherit;font-weight:700;font-size:15px">
+              ➤
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Complaints ── -->
+      <div class="page" id="page-complaints">
+        <!-- Tabs -->
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <button class="role-tab active" id="ctab-user" onclick="setComplaintTab('user',this)">👤 Аз мардум</button>
+          <button class="role-tab" id="ctab-ai"   onclick="setComplaintTab('ai',  this)">🤖 Аз AI</button>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3 id="complaintsTitle">Шикоятҳои корбарон</h3>
+            <span id="complaintsTotal" style="font-size:13px;color:var(--muted)"></span>
+          </div>
+          <div id="complaintsTableWrap"><div class="loading">Бор мешавад…</div></div>
+          <div class="pagination" id="complaintsPager" style="display:none">
+            <span id="complaintsInfo"></span>
+            <div class="pg-btns" id="complaintsPgBtns"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Broadcast ── -->
+      <div class="page" id="page-broadcast">
+        <div style="max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:16px">
+
+          <!-- Header card -->
+          <div style="background:linear-gradient(135deg,var(--primary-dark),var(--accent));border-radius:16px;padding:24px 28px;color:white">
+            <div style="display:flex;align-items:center;gap:14px">
+              <div style="width:48px;height:48px;background:rgba(255,255,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px">📢</div>
+              <div>
+                <div style="font-size:18px;font-weight:800">Паёми умумӣ</div>
+                <div style="font-size:13px;opacity:0.8;margin-top:2px">Паём ба чат + push уведомление мефиристад</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Target selector -->
+          <div style="background:white;border-radius:14px;padding:20px 24px;border:1px solid var(--border)">
+            <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:12px">Кӣ паём мегирад?</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px" id="targetGroup">
+              <label class="target-card active" onclick="setTarget('all',this)">
+                <input type="radio" name="target" value="all" checked style="display:none">
+                <div class="tc-icon">👥</div>
+                <div class="tc-label">Ҳама</div>
+                <div class="tc-sub">корбарон</div>
+              </label>
+              <label class="target-card" onclick="setTarget('buyers',this)">
+                <input type="radio" name="target" value="buyers" style="display:none">
+                <div class="tc-icon">🛒</div>
+                <div class="tc-label">Харидорон</div>
+                <div class="tc-sub">BUYER + BOTH</div>
+              </label>
+              <label class="target-card" onclick="setTarget('sellers',this)">
+                <input type="radio" name="target" value="sellers" style="display:none">
+                <div class="tc-icon">🏪</div>
+                <div class="tc-label">Фурушандагон</div>
+                <div class="tc-sub">SELLER + BOTH</div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Message -->
+          <div style="background:white;border-radius:14px;padding:20px 24px;border:1px solid var(--border)">
+            <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px">Матни паём</div>
+
+            <!-- Preview header -->
+            <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:10px 14px;margin-bottom:12px">
+              <div style="width:34px;height:34px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:13px;flex-shrink:0">А</div>
+              <div>
+                <div style="font-size:13px;font-weight:700">Администратор</div>
+                <div style="font-size:11px;color:var(--muted)">Чат + Push уведомление</div>
+              </div>
+            </div>
+
+            <textarea id="broadcastText" rows="4" placeholder="Паёмро ин ҷо нависед…"
+              style="width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;resize:vertical;outline:none;transition:border-color 0.2s;line-height:1.6"
+              onfocus="this.style.borderColor='var(--primary)'"
+              onblur="this.style.borderColor='var(--border)'"
+              oninput="document.getElementById('broadcastCharCount').textContent=this.value.length+' ҳарф'"></textarea>
+            <div style="margin-top:5px;font-size:12px;color:var(--muted);display:flex;justify-content:flex-end" id="broadcastCharCount">0 ҳарф</div>
+
+            <!-- Push checkbox -->
+            <label style="display:flex;align-items:center;gap:10px;margin-top:14px;cursor:pointer;user-select:none">
+              <input type="checkbox" id="broadcastPushCheck" checked
+                style="width:18px;height:18px;accent-color:var(--primary);cursor:pointer" />
+              <span style="font-size:13px;color:var(--muted)">
+                Push уведомление ҳам фиристодан
+              </span>
+            </label>
+
+            <button onclick="sendBroadcast()" id="broadcastBtn"
+              style="margin-top:12px;width:100%;padding:14px;background:var(--primary);color:white;border:none;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px">
+              <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.2" d="M22 2L11 13M22 2L15 22l-4-9-9-4 19-7z"/></svg>
+              Фиристодан
+            </button>
+            <div id="broadcastResult" style="margin-top:12px;display:none;padding:12px 14px;border-radius:10px;font-size:13px;font-weight:500"></div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Role + City Modal -->
+<div class="modal-overlay" id="roleModal">
+  <div class="modal" style="width:420px;max-height:90vh;display:flex;flex-direction:column">
+    <h4 style="margin-bottom:4px">🏪 Фурушанда таъин кардан</h4>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Шаҳри фурушандаро интихоб кунед (ихтиёрӣ)</p>
+    <input id="roleCitySearch" type="text" placeholder="Ҷустуҷӯ…"
+      style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:10px"
+      oninput="renderRoleCities(this.value)"
+      onfocus="this.style.borderColor='var(--primary)'"
+      onblur="this.style.borderColor='var(--border)'" />
+    <div id="roleCityList"
+      style="flex:1;overflow-y:auto;max-height:320px;border:1px solid var(--border);border-radius:8px;background:var(--bg)"></div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button onclick="closeRoleModal()"
+        style="flex:1;padding:10px;border:1.5px solid var(--border);background:white;border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px">Бекор</button>
+      <button id="roleConfirmBtn" onclick="confirmRoleChange()"
+        style="flex:2;padding:10px;background:var(--primary);color:white;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600">Тасдиқ кардан</button>
+    </div>
+  </div>
+</div>
+
+<!-- Banner Form Modal -->
+<div class="bm-overlay" id="bmOverlay">
+  <div class="bm-modal">
+    <div class="bm-header">
+      <h3 id="bmModalTitle">Банери нав</h3>
+      <button class="bm-close" onclick="closeBannerModal()">✕</button>
+    </div>
+    <div class="bm-body">
+      <!-- Image -->
+      <div class="bm-image-area" id="bmImageArea" onclick="document.getElementById('bmFileInput').click()">
+        <svg width="40" height="40" fill="none" stroke="#aaa" viewBox="0 0 24 24" id="bmImgPlaceholder"><rect x="3" y="3" width="18" height="18" rx="2" stroke-width="1.5"/><circle cx="8.5" cy="8.5" r="1.5" stroke-width="1.5"/><path stroke-width="1.5" d="M21 15l-5-5L5 21"/></svg>
+        <div style="font-size:13px;font-weight:500;color:#888;margin-top:8px" id="bmImgHint">Аксро интихоб кунед</div>
+        <div style="font-size:11px;color:#bbb">JPG, PNG, WebP то 10MB</div>
+        <img id="bmImgPreview" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover" />
+        <div class="bm-change-label">📷 Аксро иваз кунед</div>
+      </div>
+      <input type="file" id="bmFileInput" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="bmPickFile(event)" />
+
+      <!-- Title / Subtitle -->
+      <div class="bm-row">
+        <div class="bm-field">
+          <label>Сарлавҳа</label>
+          <input type="text" id="bmTitleInput" placeholder="Ихтиёрӣ" />
+        </div>
+        <div class="bm-field">
+          <label>Зертекст</label>
+          <input type="text" id="bmSubtitleInput" placeholder="Ихтиёрӣ" />
+        </div>
+      </div>
+
+      <!-- Link type + value -->
+      <div class="bm-link-row">
+        <div class="bm-field">
+          <label>Тугма / Алоқа</label>
+          <select id="bmLinkType" onchange="bmLinkTypeChange()">
+            <option value="none">🚫 Тугма нест</option>
+            <option value="whatsapp">💬 WhatsApp</option>
+            <option value="url">🔗 URL</option>
+          </select>
+        </div>
+        <div class="bm-field" id="bmLinkValueWrap" style="display:none">
+          <label id="bmLinkValueLabel">Рақами телефон</label>
+          <input type="text" id="bmLinkValueInput" placeholder="992946991122" />
+        </div>
+      </div>
+
+      <!-- Sort order -->
+      <div class="bm-field" style="max-width:160px">
+        <label>Тартиб (0 = аввал)</label>
+        <input type="number" id="bmOrderInput" value="0" min="0" />
+      </div>
+
+      <!-- Active toggle -->
+      <div class="bm-toggle-row">
+        <span style="font-size:14px;font-weight:600">Банер фаъол</span>
+        <div class="toggle-sw on" id="bmActiveToggle" onclick="bmToggleActive()">
+          <div class="toggle-knob"></div>
+        </div>
+      </div>
+    </div>
+    <div class="bm-footer">
+      <button class="btn-cancel" onclick="closeBannerModal()">Бекор</button>
+      <button class="btn-save" id="bmSaveBtn" onclick="saveBanner()">Сохтан</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h4 id="modalTitle">Нест кардан</h4>
+    <p id="modalMsg">Мутмаинед?</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Бекор</button>
+      <button class="btn-confirm-del" id="modalConfirmBtn">Нест кун</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── Config ───────────────────────────────────────────────────
+const API = 'http://172.20.10.9:3001/api/admin';
+let token = localStorage.getItem('dehot_admin_token') || '';
+let usersPage = 1, prodsPage = 1;
+const PAGE_SIZE = 15;
+
+// ─── Init ─────────────────────────────────────────────────────
+window.onload = () => {
+  if (token) showAdmin();
+};
+
+// ─── Login ────────────────────────────────────────────────────
+async function doLogin() {
+  const secret = document.getElementById('secretInput').value.trim();
+  if (!secret) return;
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Нигоҳ доред…';
+  try {
+    const r = await fetch(API + '/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret }),
+    });
+    const text = await r.text();
+    if (!text) throw new Error('Сервер ҷавоб надод. Серверро санҷед.');
+    let d;
+    try { d = JSON.parse(text); } catch { throw new Error('Ҷавоби сервер нодуруст: ' + text.slice(0,80)); }
+    if (!d.success) throw new Error(d.message);
+    token = d.token;
+    localStorage.setItem('dehot_admin_token', token);
+    showAdmin();
+  } catch (e) {
+    const el = document.getElementById('loginErr');
+    el.textContent = e.message || 'Рамзи нодуруст';
+    el.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Ворид шудан';
+  }
+}
+
+function doLogout() {
+  token = '';
+  localStorage.removeItem('dehot_admin_token');
+  document.getElementById('adminPanel').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('secretInput').value = '';
+}
+
+function showAdmin() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminPanel').style.display = 'flex';
+  loadStats();
+  loadRecentUsers();
+  loadRecentProds();
+  loadBannersCount();
+  setInterval(loadStats, 30000);
+}
+
+// ─── API helper ───────────────────────────────────────────────
+async function api(path, opts = {}) {
+  const res = await fetch(API + path, {
+    ...opts,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + token,
+      ...(opts.headers || {}),
+    },
+  });
+  if (res.status === 401) { doLogout(); return null; }
+  return res.json();
+}
+
+// ─── Stats ────────────────────────────────────────────────────
+async function loadStats() {
+  const d = await api('/stats');
+  if (!d) return;
+  const s = d.data;
+  document.getElementById('s-users').textContent  = s.totalUsers;
+  document.getElementById('s-online').textContent = s.onlineUsers;
+  document.getElementById('s-prods').textContent  = s.totalProducts;
+  document.getElementById('s-msgs').textContent   = s.totalMessages;
+  document.getElementById('onlineBadge').textContent = s.onlineUsers + ' онлайн';
+  document.getElementById('usersCountBadge').textContent = s.totalUsers;
+  document.getElementById('prodsCountBadge').textContent = s.totalProducts;
+}
+
+// ─── Navigation ───────────────────────────────────────────────
+const pageTitles = { dashboard: 'Дошбод', users: 'Корбарон', products: 'Маҳсулотҳо', banners: 'Банерҳо', broadcast: 'Паёми умумӣ', complaints: 'Шикоятҳо', ai: 'AI Модератсия' };
+
+function showPage(name, el) {
+  document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('pageTitle').textContent = pageTitles[name];
+  if (name === 'users')    { usersPage = 1; loadUsers(); }
+  if (name === 'products') { prodsPage = 1; loadProducts(); }
+  if (name === 'banners')  { loadBanners(); }
+  if (name === 'complaints') { complaintsPage = 1; loadComplaints(); }
+  if (name === 'ai') { document.getElementById('aiResults').style.display='none'; document.getElementById('aiStatus').textContent=''; }
+  if (name === 'broadcast') {
+    document.getElementById('broadcastText').value = '';
+    document.getElementById('broadcastCharCount').textContent = '0 ҳарф';
+    document.getElementById('broadcastResult').style.display = 'none';
+    document.getElementById('broadcastText').addEventListener('input', function() {
+      document.getElementById('broadcastCharCount').textContent = this.value.length + ' ҳарф';
+    });
+  }
+}
+
+// ─── Recent (dashboard) ───────────────────────────────────────
+async function loadRecentUsers() {
+  const d = await api('/users?limit=5');
+  if (!d) return;
+  const rows = d.data.map(u => `
+    <tr>
+      <td><span class="av">${u.name[0].toUpperCase()}</span>${u.name}</td>
+      <td>${u.phone}</td>
+      <td><span class="badge ${u.isActive ? 'badge-green' : 'badge-red'}">${u.isActive ? 'Фаъол' : 'Ғайрифаъол'}</span></td>
+      <td>${fmtDate(u.createdAt)}</td>
+    </tr>`).join('');
+  document.getElementById('recentUsersTable').innerHTML = `<table>
+    <thead><tr><th>Ном</th><th>Телефон</th><th>Ҳолат</th><th>Сана</th></tr></thead>
+    <tbody>${rows || '<tr><td colspan="4" class="empty-state">Корбар нест</td></tr>'}</tbody>
+  </table>`;
+}
+
+async function loadRecentProds() {
+  const d = await api('/products?limit=5');
+  if (!d) return;
+  const rows = d.data.map(p => `
+    <tr>
+      <td>${p.images[0] ? `<img class="thumb" src="${p.images[0].url}" onerror="this.style.display='none'" />` : ''}<b>${p.title}</b></td>
+      <td>${p.seller?.name || '—'}</td>
+      <td>${p.basePrice} см/${p.unit}</td>
+      <td><span class="badge ${statusClass(p.status)}">${statusLabel(p.status)}</span></td>
+    </tr>`).join('');
+  document.getElementById('recentProdsTable').innerHTML = `<table>
+    <thead><tr><th>Маҳсулот</th><th>Фурӯшанда</th><th>Нарх</th><th>Ҳолат</th></tr></thead>
+    <tbody>${rows || '<tr><td colspan="4" class="empty-state">Маҳсулот нест</td></tr>'}</tbody>
+  </table>`;
+}
+
+// ─── Users ────────────────────────────────────────────────────
+let _usersRoleFilter = 'all';
+
+function setRoleFilter(role, el) {
+  _usersRoleFilter = role;
+  document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const titles = { all: 'Ҳамаи корбарон', SELLER: 'Фурушандагон', BUYER: 'Харидорон' };
+  document.getElementById('usersTitle').textContent = titles[role];
+  usersPage = 1;
+  loadUsers();
+}
+
+async function loadUsers(page) {
+  if (page) usersPage = page;
+  const search = document.getElementById('userSearch')?.value || '';
+  document.getElementById('usersTableWrap').innerHTML = '<div class="loading">Бор мешавад…</div>';
+  const roleParam = _usersRoleFilter !== 'all' ? `&role=${_usersRoleFilter}` : '';
+  const d = await api(`/users?page=${usersPage}&limit=${PAGE_SIZE}&search=${encodeURIComponent(search)}${roleParam}`);
+  if (!d) return;
+  const { data, meta } = d;
+
+  const rows = data.map(u => `
+    <tr id="ur-${u.id}">
+      <td><span class="av">${u.name[0].toUpperCase()}</span>${u.name}</td>
+      <td>${u.phone}</td>
+      <td>${u.city || '—'}</td>
+      <td>
+        <select class="select-status" onchange="changeRole('${u.id}',this.value,'${u.city||''}')" style="min-width:110px">
+          <option value="BUYER"  ${u.role==='BUYER' ?'selected':''}>Харидор</option>
+          <option value="SELLER" ${u.role==='SELLER'?'selected':''}>Фурушанда</option>
+        </select>
+      </td>
+      <td>${u._count.products}</td>
+      <td><span class="badge ${u.isActive ? 'badge-green' : 'badge-red'}">${u.isActive ? 'Фаъол' : 'Бастааст'}</span></td>
+      <td>${fmtDate(u.createdAt)}</td>
+      <td style="white-space:nowrap">
+        <button class="action-btn btn-tog" onclick="toggleUser('${u.id}','${u.name}',${u.isActive})">${u.isActive ? 'Бандан' : 'Кушодан'}</button>
+        <button class="action-btn btn-del" onclick="confirmDelete('user','${u.id}','${u.name.replace(/'/g,"\\'")}')">Нест</button>
+      </td>
+    </tr>`).join('');
+
+  document.getElementById('usersTableWrap').innerHTML = `<table>
+    <thead><tr><th>Ном</th><th>Телефон</th><th>Шаҳр</th><th>Нақш</th><th>Элон</th><th>Ҳолат</th><th>Сана</th><th>Амалиёт</th></tr></thead>
+    <tbody>${rows || '<tr><td colspan="8"><div class="empty-state">Корбар ёфт нашуд</div></td></tr>'}</tbody>
+  </table>`;
+
+  renderPager('users', meta, usersPage);
+}
+
+async function toggleUser(id, name, isActive) {
+  const d = await api(`/users/${id}/active`, { method: 'PATCH' });
+  if (!d) return;
+  showToast(`${name} — ${d.data.isActive ? 'кушода шуд' : 'баста шуд'}`, 'success');
+  loadUsers();
+}
+
+// Cities list for city picker
+const ALL_CITIES = [
+  {city:'Душанбе',region:'Душанбе'},
+  {city:'Хуҷанд',region:'Суғд'},{city:'Абдураҳмони Ҷомӣ',region:'Суғд'},{city:'Айнӣ',region:'Суғд'},{city:'Ашт',region:'Суғд'},{city:'Бобоҷон Ғафуров',region:'Суғд'},{city:'Бӯстон (Чкаловск)',region:'Суғд'},{city:'Гулистон (Қайроққум)',region:'Суғд'},{city:'Деваштич (Ғончӣ)',region:'Суғд'},{city:'Ҷаббор Расулов',region:'Суғд'},{city:'Зафаробод',region:'Суғд'},{city:'Истаравшан',region:'Суғд'},{city:'Исфара',region:'Суғд'},{city:'Конибодом',region:'Суғд'},{city:'Мастчоҳ',region:'Суғд'},{city:'Мастчоҳи Кӯҳӣ',region:'Суғд'},{city:'Панҷакент',region:'Суғд'},{city:'Спитамен',region:'Суғд'},{city:'Шаҳристон',region:'Суғд'},
+  {city:'Балҷувон',region:'Хатлон'},{city:'Бохтар (Қурғон-Теппа)',region:'Хатлон'},{city:'Вахш',region:'Хатлон'},{city:'Восеъ',region:'Хатлон'},{city:'Данғара',region:'Хатлон'},{city:'Дӯстӣ (Ҷиликӯл)',region:'Хатлон'},{city:'Ҷайҳун (Қумсангир)',region:'Хатлон'},{city:'Ҷалолиддин Балхӣ (Румӣ)',region:'Хатлон'},{city:'Ҷомӣ',region:'Хатлон'},{city:'Истиқлол',region:'Хатлон'},{city:'Қубодиён',region:'Хатлон'},{city:'Кӯлоб',region:'Хатлон'},{city:'Кӯшониён (Бохтар)',region:'Хатлон'},{city:'Левакант (Сарбанд)',region:'Хатлон'},{city:'Меҳнатобод',region:'Хатлон'},{city:'Мӯъминобод',region:'Хатлон'},{city:'Носири Хусрав',region:'Хатлон'},{city:'Норак',region:'Хатлон'},{city:'Панҷ',region:'Хатлон'},{city:'Темурмалик',region:'Хатлон'},{city:'Фархор',region:'Хатлон'},{city:'Ҳамадонӣ',region:'Хатлон'},{city:'Ховалинг',region:'Хатлон'},{city:'Хуросон',region:'Хатлон'},{city:'Шамсиддин Шоҳин (Шӯрообод)',region:'Хатлон'},{city:'Шаҳритӯз',region:'Хатлон'},{city:'Ёвон',region:'Хатлон'},
+  {city:'Ванҷ',region:'ВМКБ'},{city:'Дарвоз',region:'ВМКБ'},{city:'Ишкошим',region:'ВМКБ'},{city:'Мурғоб',region:'ВМКБ'},{city:'Роштқалъа',region:'ВМКБ'},{city:'Рӯшон',region:'ВМКБ'},{city:'Хоруғ',region:'ВМКБ'},{city:'Шуғнон',region:'ВМКБ'},
+  {city:'Варзоб',region:'РРП'},{city:'Ваҳдат',region:'РРП'},{city:'Ҳисор',region:'РРП'},{city:'Лахш (Ҷиргатол)',region:'РРП'},{city:'Нуробод',region:'РРП'},{city:'Рашт',region:'РРП'},{city:'Роғун',region:'РРП'},{city:'Рӯдакӣ',region:'РРП'},{city:'Сангвор (Тавилдара)',region:'РРП'},{city:'Тоҷикобод',region:'РРП'},{city:'Турсунзода',region:'РРП'},{city:'Файзобод',region:'РРП'},{city:'Шаҳринав',region:'РРП'},
+].sort((a,b)=>a.city.localeCompare(b.city));
+
+let _roleModalId = null, _roleModalRole = null, _roleModalCity = null;
+
+function showRoleModal(id, role, currentCity) {
+  _roleModalId = id; _roleModalRole = role; _roleModalCity = currentCity || null;
+  const el = document.getElementById('roleModal');
+  el.classList.add('open');
+  document.getElementById('roleCitySearch').value = '';
+  renderRoleCities('');
+  // pre-select current city
+  if (currentCity) {
+    document.querySelectorAll('#roleCityList .rc-item').forEach(i => {
+      if (i.dataset.city === currentCity) i.classList.add('selected');
+    });
+  }
+}
+
+function closeRoleModal() {
+  document.getElementById('roleModal').classList.remove('open');
+  _roleModalId = _roleModalRole = _roleModalCity = null;
+}
+
+function renderRoleCities(q) {
+  const list = document.getElementById('roleCityList');
+  const filtered = q ? ALL_CITIES.filter(c=>c.city.toLowerCase().includes(q.toLowerCase())) : ALL_CITIES;
+  list.innerHTML = filtered.map(c=>`
+    <div class="rc-item ${_roleModalCity===c.city?'selected':''}" data-city="${c.city}" data-region="${c.region}" onclick="selectRoleCity(this,'${c.city}')">
+      <span style="color:#999;font-size:13px">📍</span> ${c.city}
+      <span style="margin-left:auto;font-size:11px;color:#999">${c.region}</span>
+      ${_roleModalCity===c.city?'<span style="color:var(--primary);margin-left:6px">✓</span>':''}
+    </div>`).join('');
+}
+
+function selectRoleCity(el, city) {
+  _roleModalCity = city;
+  document.querySelectorAll('#roleCityList .rc-item').forEach(i=>i.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+async function confirmRoleChange() {
+  if (!_roleModalId) return;
+  const btn = document.getElementById('roleConfirmBtn');
+  btn.disabled = true; btn.textContent = 'Сабт мешавад…';
+  const body = { role: _roleModalRole };
+  if (_roleModalCity) body.city = _roleModalCity;
+  const d = await api(`/users/${_roleModalId}/role`, { method: 'PATCH', body: JSON.stringify(body) });
+  btn.disabled = false; btn.textContent = 'Тасдиқ кардан';
+  closeRoleModal();
+  if (d?.success) {
+    const label = _roleModalRole === 'SELLER' ? 'Фурушанда' : 'Харидор';
+    showToast(`${d.data.name} — ${label} шуд ✓`, 'success');
+    loadUsers();
+  } else {
+    showToast(d?.message || 'Хато', 'error');
+  }
+}
+
+async function changeRole(id, role, currentCity) {
+  if (role === 'SELLER') {
+    showRoleModal(id, role, currentCity);
+  } else {
+    // BUYER — directly update without city picker
+    const d = await api(`/users/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) });
+    if (d?.success) {
+      showToast(`${d.data.name} — Харидор шуд`, 'success');
+      loadUsers();
+    } else {
+      showToast(d?.message || 'Хато', 'error');
+    }
+  }
+}
+
+// ─── Products ─────────────────────────────────────────────────
+async function loadProducts(page) {
+  if (page) prodsPage = page;
+  const search = document.getElementById('prodSearch')?.value || '';
+  document.getElementById('prodsTableWrap').innerHTML = '<div class="loading">Бор мешавад…</div>';
+  const d = await api(`/products?page=${prodsPage}&limit=${PAGE_SIZE}&search=${encodeURIComponent(search)}`);
+  if (!d) return;
+  const { data, meta } = d;
+
+  const statusOpts = ['ACTIVE','INACTIVE','PENDING','SOLD'].map(s =>
+    `<option value="${s}" ${s===data.status?'selected':''}>${statusLabel(s)}</option>`
+  ).join('');
+
+  const rows = data.map(p => `
+    <tr id="pr-${p.id}">
+      <td style="max-width:200px">
+        ${p.images[0] ? `<img class="thumb" src="${p.images[0].url}" onerror="this.style.display='none'" />` : ''}
+        <b>${p.title}</b>
+      </td>
+      <td>${p.seller?.name || '—'}<br><small style="color:var(--muted)">${p.seller?.phone || ''}</small></td>
+      <td>${p.category?.name || '—'}</td>
+      <td>${p.basePrice} см/${p.unit}</td>
+      <td>${p.viewCount}</td>
+      <td>
+        <select class="select-status" onchange="changeStatus('${p.id}',this.value)">
+          ${['ACTIVE','INACTIVE','PENDING','SOLD'].map(s =>
+            `<option value="${s}" ${s===p.status?'selected':''}>${statusLabel(s)}</option>`
+          ).join('')}
+        </select>
+      </td>
+      <td>${fmtDate(p.createdAt)}</td>
+      <td>
+        <button class="action-btn btn-del" onclick="confirmDelete('product','${p.id}','${p.title.replace(/'/g,"\\'")}')">Нест</button>
+      </td>
+    </tr>`).join('');
+
+  document.getElementById('prodsTableWrap').innerHTML = `<table>
+    <thead><tr><th>Маҳсулот</th><th>Фурӯшанда</th><th>Категория</th><th>Нарх</th><th>Дидан</th><th>Ҳолат</th><th>Сана</th><th>Амалиёт</th></tr></thead>
+    <tbody>${rows || '<tr><td colspan="8"><div class="empty-state">Маҳсулот ёфт нашуд</div></td></tr>'}</tbody>
+  </table>`;
+
+  renderPager('products', meta, prodsPage);
+}
+
+async function changeStatus(id, status) {
+  const d = await api(`/products/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+  if (d?.success) showToast('Ҳолат тағйир ёфт', 'success');
+}
+
+// ─── Delete ───────────────────────────────────────────────────
+let pendingDelete = null;
+
+function confirmDelete(type, id, name) {
+  pendingDelete = { type, id, name };
+  document.getElementById('modalTitle').textContent = 'Нест кардан';
+  document.getElementById('modalMsg').textContent = `"${name}" нест карда шавад? Ин амал баргашт надорад.`;
+  document.getElementById('modalConfirmBtn').onclick = execDelete;
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('confirmModal').classList.remove('open');
+  pendingDelete = null;
+}
+
+async function execDelete() {
+  if (!pendingDelete) return;
+  const { type, id, name } = pendingDelete;
+  closeModal();
+  const path = type === 'user' ? `/users/${id}` : `/products/${id}`;
+  const d = await api(path, { method: 'DELETE' });
+  if (!d) return;
+  showToast(`"${name}" нест карда шуд`, 'success');
+  if (type === 'user') { loadUsers(); loadStats(); }
+  else                 { loadProducts(); loadStats(); }
+}
+
+// ─── Pagination ───────────────────────────────────────────────
+function renderPager(which, meta, current) {
+  const map = {
+    users:      { pager: 'usersPager',      info: 'usersInfo',      btns: 'usersPgBtns',      fn: 'loadUsers' },
+    products:   { pager: 'prodsPager',      info: 'prodsInfo',      btns: 'prodsPgBtns',      fn: 'loadProducts' },
+    complaints: { pager: 'complaintsPager', info: 'complaintsInfo', btns: 'complaintsPgBtns', fn: 'loadComplaints' },
+  };
+  const { pager, info, btns: btnsId, fn } = map[which] || map.users;
+
+  const totalPages = Math.ceil(meta.total / PAGE_SIZE);
+  document.getElementById(pager).style.display = meta.total > 0 ? 'flex' : 'none';
+  document.getElementById(info).textContent =
+    `${(current - 1) * PAGE_SIZE + 1}–${Math.min(current * PAGE_SIZE, meta.total)} / ${meta.total}`;
+
+  let btns = '';
+  btns += `<button class="pg-btn" onclick="${fn}(${current-1})" ${current<=1?'disabled':''}>‹</button>`;
+  for (let p = Math.max(1, current-2); p <= Math.min(totalPages, current+2); p++) {
+    btns += `<button class="pg-btn ${p===current?'current':''}" onclick="${fn}(${p})">${p}</button>`;
+  }
+  btns += `<button class="pg-btn" onclick="${fn}(${current+1})" ${current>=totalPages?'disabled':''}>›</button>`;
+  document.getElementById(btnsId).innerHTML = btns;
+}
+
+// ─── Search debounce ──────────────────────────────────────────
+let userST, prodST;
+function debouncedUserSearch() {
+  clearTimeout(userST);
+  userST = setTimeout(() => { usersPage = 1; loadUsers(); }, 400);
+}
+function debouncedProdSearch() {
+  clearTimeout(prodST);
+  prodST = setTimeout(() => { prodsPage = 1; loadProducts(); }, 400);
+}
+
+// ─── Toast ────────────────────────────────────────────────────
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ─── Helpers ──────────────────────────────────────────────────
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getFullYear()}`;
+}
+
+function roleLabel(r) {
+  return r === 'SELLER' ? 'Фурӯшанда' : r === 'BUYER' ? 'Харидор' : 'Ҳарду';
+}
+
+function statusLabel(s) {
+  return { ACTIVE:'Фаъол', INACTIVE:'Ғайрифаъол', PENDING:'Дар интизор', SOLD:'Фурӯхта шуд' }[s] || s;
+}
+
+function statusClass(s) {
+  return { ACTIVE:'badge-green', INACTIVE:'badge-red', PENDING:'badge-amber', SOLD:'badge-blue' }[s] || 'badge-gray';
+}
+
+// ─── Banners ──────────────────────────────────────────────────
+let _banners = [];
+let _bmEditId = null;
+let _bmActive = true;
+let _bmPickedFile = null;
+let _bmCurrentUrl = null;
+
+async function loadBannersCount() {
+  const d = await api('/banners');
+  if (!d) return;
+  _banners = d.data;
+  document.getElementById('bannersCountBadge').textContent = _banners.length;
+}
+
+async function loadBanners() {
+  document.getElementById('bannersGrid').innerHTML = '<div class="loading">Бор мешавад…</div>';
+  const d = await api('/banners');
+  if (!d) return;
+  _banners = d.data;
+  document.getElementById('bannersCountBadge').textContent = _banners.length;
+  renderBanners();
+}
+
+function renderBanners() {
+  const grid = document.getElementById('bannersGrid');
+  if (_banners.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="background:white;border-radius:14px;border:1px solid var(--border);padding:56px;grid-column:1/-1">
+      Банер нест. Тугмаи «+ Банер илова»-ро зер кунед.
+    </div>`;
+    return;
+  }
+  grid.innerHTML = _banners.map(b => {
+    const imgHtml = b.imageUrl
+      ? `<img src="${b.imageUrl}" onerror="this.style.display='none'" />`
+      : `<span style="color:var(--muted);font-size:12px">Акс нест</span>`;
+    const linkBadge = b.linkType === 'whatsapp'
+      ? `<span class="badge badge-green">💬 ${b.linkValue || ''}</span>`
+      : b.linkType === 'url'
+        ? `<span class="badge badge-blue">🔗 URL</span>`
+        : `<span class="badge badge-gray">Тугма нест</span>`;
+    return `
+    <div class="banner-card">
+      <div class="banner-card-img">${imgHtml}</div>
+      <div class="banner-card-body">
+        <div class="banner-card-title">${b.title || '(бе сарлавҳа)'}</div>
+        <div class="banner-card-sub">${b.subtitle || ''}</div>
+        <div class="banner-card-meta">
+          ${linkBadge}
+          <span class="badge ${b.isActive ? 'badge-green' : 'badge-red'}">${b.isActive ? 'Фаъол' : 'Ғайрифаъол'}</span>
+          <span class="badge badge-gray">№${b.sortOrder}</span>
+        </div>
+      </div>
+      <div class="banner-card-actions">
+        <button class="action-btn btn-edit" onclick="editBanner('${b.id}')">✏️ Таҳрир</button>
+        <button class="action-btn btn-del"  onclick="bmConfirmDelete('${b.id}','${(b.title||'банер').replace(/'/g,"\\'")}')">🗑 Нест</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openBannerModal() {
+  _bmEditId = null; _bmPickedFile = null; _bmCurrentUrl = null; _bmActive = true;
+  document.getElementById('bmModalTitle').textContent = 'Банери нав';
+  document.getElementById('bmTitleInput').value    = '';
+  document.getElementById('bmSubtitleInput').value = '';
+  document.getElementById('bmLinkType').value      = 'none';
+  document.getElementById('bmLinkValueInput').value = '';
+  document.getElementById('bmOrderInput').value    = '0';
+  document.getElementById('bmActiveToggle').className = 'toggle-sw on';
+  bmResetImage();
+  bmLinkTypeChange();
+  document.getElementById('bmOverlay').classList.add('open');
+}
+
+function editBanner(id) {
+  const b = _banners.find(x => x.id === id);
+  if (!b) return;
+  _bmEditId = id; _bmPickedFile = null; _bmCurrentUrl = b.imageUrl || null; _bmActive = b.isActive;
+  document.getElementById('bmModalTitle').textContent = 'Банерро таҳрир кун';
+  document.getElementById('bmTitleInput').value    = b.title    || '';
+  document.getElementById('bmSubtitleInput').value = b.subtitle || '';
+  document.getElementById('bmLinkType').value      = b.linkType || 'none';
+  document.getElementById('bmLinkValueInput').value = b.linkValue || '';
+  document.getElementById('bmOrderInput').value    = b.sortOrder ?? 0;
+  document.getElementById('bmActiveToggle').className = 'toggle-sw ' + (b.isActive ? 'on' : '');
+  if (b.imageUrl) { bmShowImage(b.imageUrl); } else { bmResetImage(); }
+  bmLinkTypeChange();
+  document.getElementById('bmOverlay').classList.add('open');
+}
+
+function closeBannerModal() {
+  document.getElementById('bmOverlay').classList.remove('open');
+  document.getElementById('bmFileInput').value = '';
+}
+
+function bmResetImage() {
+  document.getElementById('bmImgPreview').style.display = 'none';
+  document.getElementById('bmImgPlaceholder').style.display = '';
+  document.getElementById('bmImgHint').textContent = 'Аксро интихоб кунед';
+}
+
+function bmShowImage(src) {
+  const img = document.getElementById('bmImgPreview');
+  img.src = src; img.style.display = 'block';
+  document.getElementById('bmImgPlaceholder').style.display = 'none';
+  document.getElementById('bmImgHint').style.display = 'none';
+}
+
+function bmPickFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  _bmPickedFile = file;
+  const reader = new FileReader();
+  reader.onload = ev => bmShowImage(ev.target.result);
+  reader.readAsDataURL(file);
+}
+
+function bmLinkTypeChange() {
+  const type = document.getElementById('bmLinkType').value;
+  const wrap = document.getElementById('bmLinkValueWrap');
+  if (type === 'none') {
+    wrap.style.display = 'none';
+  } else {
+    wrap.style.display = '';
+    document.getElementById('bmLinkValueLabel').textContent =
+      type === 'whatsapp' ? 'Рақами телефон' : 'URL суроға';
+    document.getElementById('bmLinkValueInput').placeholder =
+      type === 'whatsapp' ? '992946991122' : 'https://...';
+  }
+}
+
+function bmToggleActive() {
+  _bmActive = !_bmActive;
+  document.getElementById('bmActiveToggle').className = 'toggle-sw ' + (_bmActive ? 'on' : '');
+}
+
+async function saveBanner() {
+  const btn = document.getElementById('bmSaveBtn');
+  btn.disabled = true; btn.textContent = 'Сохта истодааст…';
+  try {
+    // Upload image if new file picked
+    let imageUrl = _bmCurrentUrl || '';
+    if (_bmPickedFile) {
+      const form = new FormData();
+      form.append('image', _bmPickedFile);
+      const r = await fetch(API + '/banners/upload', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token },
+        body: form,
+      });
+      const up = await r.json();
+      if (!up.success) throw new Error(up.message || 'Акс бор нашуд');
+      imageUrl = up.url;
+    }
+
+    const data = {
+      title:     document.getElementById('bmTitleInput').value.trim(),
+      subtitle:  document.getElementById('bmSubtitleInput').value.trim(),
+      imageUrl,
+      linkType:  document.getElementById('bmLinkType').value,
+      linkValue: document.getElementById('bmLinkValueInput').value.trim(),
+      isActive:  _bmActive,
+      sortOrder: parseInt(document.getElementById('bmOrderInput').value) || 0,
+    };
+
+    const d = _bmEditId
+      ? await api('/banners/' + _bmEditId, { method: 'PUT',  body: JSON.stringify(data) })
+      : await api('/banners',              { method: 'POST', body: JSON.stringify(data) });
+
+    if (!d || !d.success) throw new Error(d?.message || 'Хато рӯй дод');
+    closeBannerModal();
+    showToast(_bmEditId ? 'Банер сабт шуд ✓' : 'Банер илова шуд ✓', 'success');
+    loadBanners();
+  } catch (err) {
+    showToast(err.message || 'Хато рӯй дод', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Сохтан';
+  }
+}
+
+// ─── AI Moderation ────────────────────────────────────────────
+async function runAiModeration() {
+  const btn = document.getElementById('aiBtn');
+  const status = document.getElementById('aiStatus');
+  const results = document.getElementById('aiResults');
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-width="2" d="M12 6v6l4 2"/></svg> AI тафтиш мекунад…';
+  status.textContent = 'Лутфан мунтазир шавед. Ин 30–60 сония вақт мегирад…';
+  results.style.display = 'none';
+
+  const d = await api('/ai-moderation', { method: 'POST' });
+  btn.disabled = false;
+  btn.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Тафтиш оғоз кардан';
+
+  if (!d || !d.success) { status.textContent = 'Хато рӯй дод'; return; }
+
+  status.textContent = `${d.checked} элон тафтиш шуд.`;
+  results.style.display = 'block';
+
+  const flagged = d.data;
+  document.getElementById('aiSummary').innerHTML = flagged.length === 0
+    ? '<span style="color:var(--success)">✅ Ҳамаи элонҳо кишоварзӣ ҳастанд!</span>'
+    : `<span style="color:var(--danger)">⚠️ ${flagged.length} элон ба кишоварзӣ рабт надорад:</span>`;
+
+  document.getElementById('aiFlaggedList').innerHTML = flagged.map(p => `
+    <div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;background:var(--bg)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-weight:700;font-size:14px">${p.title}</div>
+          <div style="font-size:12px;color:var(--muted);margin:3px 0">${p.category || '—'}</div>
+          <div style="font-size:13px;color:var(--danger)">${p.reason}</div>
+        </div>
+        <button onclick="aiDeleteProduct('${p.id}', this)"
+          style="padding:7px 14px;background:var(--danger);color:white;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap;margin-left:12px">
+          Нест кардан
+        </button>
+      </div>
+    </div>`).join('') || '<div style="color:var(--muted);font-size:13px">Нишонда нашуд</div>';
+}
+
+async function aiDeleteProduct(id, btn) {
+  btn.disabled = true; btn.textContent = '…';
+  const d = await api(`/products/${id}`, { method: 'DELETE' });
+  if (d?.success) { btn.closest('div[style]').remove(); showToast('Элон нест карда шуд ✓', 'success'); }
+  else { btn.disabled = false; btn.textContent = 'Нест кардан'; showToast('Хато', 'error'); }
+}
+
+// ─── AI Chat ──────────────────────────────────────────────────
+async function sendAiChat() {
+  const input = document.getElementById('aiChatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  const btn = document.getElementById('aiChatBtn');
+  btn.disabled = true;
+
+  const msgs = document.getElementById('aiChatMessages');
+  msgs.innerHTML += `<div style="align-self:flex-end;background:var(--primary);color:white;border-radius:12px;padding:10px 14px;max-width:80%;font-size:13px">${msg}</div>`;
+  msgs.innerHTML += `<div id="aiTyping" style="align-self:flex-start;background:white;border:1px solid var(--border);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--muted)">...</div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+
+  const d = await api('/ai-chat', { method: 'POST', body: JSON.stringify({ message: msg }) });
+  document.getElementById('aiTyping')?.remove();
+  const reply = d?.reply || 'Хато рӯй дод';
+  msgs.innerHTML += `<div style="align-self:flex-start;background:white;border:1px solid var(--border);border-radius:12px;padding:10px 14px;max-width:85%;font-size:13px;white-space:pre-wrap">${reply}</div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+  btn.disabled = false;
+}
+
+// ─── Complaints ───────────────────────────────────────────────
+let complaintsPage = 1;
+let _complaintsSource = 'user';
+
+function setComplaintTab(source, el) {
+  _complaintsSource = source;
+  document.querySelectorAll('[id^="ctab-"]').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('complaintsTitle').textContent = source === 'ai' ? 'Шикоятҳои AI' : 'Шикоятҳои корбарон';
+  complaintsPage = 1;
+  loadComplaints();
+}
+
+async function loadComplaints(page) {
+  if (page) complaintsPage = page;
+  const sourceParam = `&source=${_complaintsSource}`;
+  document.getElementById('complaintsTableWrap').innerHTML = '<div class="loading">Бор мешавад…</div>';
+  const d = await api(`/complaints?page=${complaintsPage}&limit=20${sourceParam}`);
+  if (!d) return;
+  const { data, meta } = d;
+
+  document.getElementById('complaintsTotal').textContent = `Ҳамаги: ${meta.total}`;
+  document.getElementById('complaintsCountBadge').textContent = meta.total || '';
+
+  if (!data.length) {
+    document.getElementById('complaintsTableWrap').innerHTML = '<div class="empty-state">Шикоят нест</div>';
+    return;
+  }
+
+  const rows = data.map(c => `
+    <tr>
+      <td>
+        ${c.product?.images?.[0]?.url ? `<img src="${c.product.images[0].url}" style="width:52px;height:52px;object-fit:cover;border-radius:8px;margin-bottom:4px;display:block" onerror="this.style.display='none'">` : ''}
+        <b>${c.product?.title || '—'}</b><br>
+        <small style="color:var(--muted)">Фурушанда: ${c.product?.seller?.name || '—'}</small><br>
+        <small style="color:var(--muted)">${c.product?.seller?.phone || ''}</small>
+      </td>
+      <td style="max-width:280px;word-break:break-word">${c.text}</td>
+      <td>${c.source === 'ai' ? '🤖 AI' : `👤 ${c.user?.name || '—'}`}</td>
+      <td>${fmtDate(c.createdAt)}</td>
+      <td style="white-space:nowrap">
+        <button class="action-btn btn-del" onclick="deleteComplaintProduct('${c.product?.id}','${c.id}')">Элон нест</button>
+        <button class="action-btn btn-tog" onclick="deleteComplaintItem('${c.id}')">Шикоят нест</button>
+      </td>
+    </tr>`).join('');
+
+  document.getElementById('complaintsTableWrap').innerHTML = `<table>
+    <thead><tr><th>Элон / Фурушанда</th><th>Сабаб</th><th>Манбаъ</th><th>Сана</th><th>Амал</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+
+  renderPager('complaints', meta, complaintsPage);
+}
+
+async function deleteComplaintItem(id) {
+  const d = await api(`/complaints/${id}`, { method: 'DELETE' });
+  if (d?.success) { showToast('Шикоят нест карда шуд ✓', 'success'); loadComplaints(); }
+}
+
+async function deleteComplaintProduct(productId, complaintId) {
+  if (!productId) return;
+  const d = await api(`/products/${productId}`, { method: 'DELETE' });
+  if (d?.success) {
+    await api(`/complaints/${complaintId}`, { method: 'DELETE' });
+    showToast('Элон нест карда шуд ✓', 'success');
+    loadComplaints();
+  }
+}
+
+// ─── Broadcast ────────────────────────────────────────────────
+let _broadcastTarget = 'all';
+
+function setTarget(val, el) {
+  _broadcastTarget = val;
+  document.querySelectorAll('.target-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+async function sendBroadcast() {
+  const text = document.getElementById('broadcastText').value.trim();
+  if (!text) { showToast('Паём холӣ аст', 'error'); return; }
+  const btn = document.getElementById('broadcastBtn');
+  const res = document.getElementById('broadcastResult');
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-width="2" d="M12 6v6l4 2"/></svg> Фиристода истодааст…';
+  res.style.display = 'none';
+  try {
+    const withPush = document.getElementById('broadcastPushCheck').checked;
+    const d = await api('/broadcast', { method: 'POST', body: JSON.stringify({ text, target: _broadcastTarget, withPush }) });
+    if (!d || !d.success) throw new Error(d?.message || 'Хато рӯй дод');
+    res.style.cssText = 'margin-top:12px;display:block;padding:12px 14px;border-radius:10px;font-size:13px;font-weight:600;background:var(--success-light);color:var(--success)';
+    res.textContent = '✓ ' + d.message;
+    document.getElementById('broadcastText').value = '';
+    document.getElementById('broadcastCharCount').textContent = '0 ҳарф';
+  } catch (err) {
+    res.style.cssText = 'margin-top:12px;display:block;padding:12px 14px;border-radius:10px;font-size:13px;font-weight:600;background:var(--danger-light);color:var(--danger)';
+    res.textContent = '✗ ' + (err.message || 'Хато');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.2" d="M22 2L11 13M22 2L15 22l-4-9-9-4 19-7z"/></svg> Фиристодан';
+  }
+}
+
+function bmConfirmDelete(id, name) {
+  document.getElementById('modalTitle').textContent = 'Банер нест кардан';
+  document.getElementById('modalMsg').textContent   = `"${name}" нест карда шавад? Ин амал баргашт надорад.`;
+  document.getElementById('modalConfirmBtn').onclick = async () => {
+    closeModal();
+    const d = await api('/banners/' + id, { method: 'DELETE' });
+    if (!d) return;
+    showToast('Банер нест карда шуд', 'success');
+    loadBanners();
+  };
+  document.getElementById('confirmModal').classList.add('open');
+}
+</script>
+</body>
+</html>
