@@ -1211,7 +1211,7 @@
 
 <script>
 // ─── Config ───────────────────────────────────────────────────
-const API = 'http://172.20.10.9:3001/api/admin';
+const API = window.location.origin + '/api/admin';
 let token = localStorage.getItem('dehot_admin_token') || '';
 let usersPage = 1, prodsPage = 1;
 const PAGE_SIZE = 15;
