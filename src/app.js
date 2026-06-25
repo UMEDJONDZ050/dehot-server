@@ -18,6 +18,7 @@ const uploadRoutes   = require('./routes/upload.routes');
 const adminRoutes    = require('./routes/admin.routes');
 const bannerRoutes    = require('./routes/banner.routes');
 const complaintRoutes = require('./routes/complaint.routes');
+const taxiRoutes      = require('./routes/taxi.routes');
 const errorHandler   = require('./middleware/errorHandler');
 
 const app = express();
@@ -39,6 +40,7 @@ app.use('/api/upload',     uploadRoutes);
 app.use('/api/admin',      adminRoutes);
 app.use('/api/banners',    bannerRoutes);
 app.use('/api/complaints', complaintRoutes);
+app.use('/api/taxi',       taxiRoutes);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 

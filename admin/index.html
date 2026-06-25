@@ -1109,15 +1109,40 @@
 <!-- Role + City Modal -->
 <div class="modal-overlay" id="roleModal">
   <div class="modal" style="width:420px;max-height:90vh;display:flex;flex-direction:column">
-    <h4 style="margin-bottom:4px">🏪 Фурушанда таъин кардан</h4>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Шаҳри фурушандаро интихоб кунед (ихтиёрӣ)</p>
-    <input id="roleCitySearch" type="text" placeholder="Ҷустуҷӯ…"
-      style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:10px"
-      oninput="renderRoleCities(this.value)"
-      onfocus="this.style.borderColor='var(--primary)'"
-      onblur="this.style.borderColor='var(--border)'" />
-    <div id="roleCityList"
-      style="flex:1;overflow-y:auto;max-height:320px;border:1px solid var(--border);border-radius:8px;background:var(--bg)"></div>
+    <h4 id="roleModalTitle" style="margin-bottom:4px">🏪 Фурушанда таъин кардан</h4>
+    <p id="roleModalSubtitle" style="font-size:13px;color:var(--muted);margin-bottom:16px">Шаҳри фурушандаро интихоб кунед (ихтиёрӣ)</p>
+
+    <!-- Seller: city picker -->
+    <div id="roleCitySection">
+      <input id="roleCitySearch" type="text" placeholder="Ҷустуҷӯ…"
+        style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:10px"
+        oninput="renderRoleCities(this.value)"
+        onfocus="this.style.borderColor='var(--primary)'"
+        onblur="this.style.borderColor='var(--border)'" />
+      <div id="roleCityList"
+        style="flex:1;overflow-y:auto;max-height:260px;border:1px solid var(--border);border-radius:8px;background:var(--bg)"></div>
+    </div>
+
+    <!-- Driver: route picker -->
+    <div id="roleDriverSection" style="display:none">
+      <p style="font-size:13px;font-weight:600;margin-bottom:6px">Шаҳри аввал (аз куҷо)</p>
+      <input id="driverFromSearch" type="text" placeholder="Ҷустуҷӯ…"
+        style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:6px"
+        oninput="renderDriverCities('from',this.value)"
+        onfocus="this.style.borderColor='var(--primary)'"
+        onblur="this.style.borderColor='var(--border)'" />
+      <div id="driverFromList"
+        style="overflow-y:auto;max-height:160px;border:1px solid var(--border);border-radius:8px;background:var(--bg);margin-bottom:14px"></div>
+      <p style="font-size:13px;font-weight:600;margin-bottom:6px">Шаҳри дувум (ба куҷо)</p>
+      <input id="driverToSearch" type="text" placeholder="Ҷустуҷӯ…"
+        style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:6px"
+        oninput="renderDriverCities('to',this.value)"
+        onfocus="this.style.borderColor='var(--primary)'"
+        onblur="this.style.borderColor='var(--border)'" />
+      <div id="driverToList"
+        style="overflow-y:auto;max-height:160px;border:1px solid var(--border);border-radius:8px;background:var(--bg)"></div>
+    </div>
+
     <div style="display:flex;gap:10px;margin-top:14px">
       <button onclick="closeRoleModal()"
         style="flex:1;padding:10px;border:1.5px solid var(--border);background:white;border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px">Бекор</button>
@@ -1381,9 +1406,11 @@ async function loadUsers(page) {
       <td>${u.phone}</td>
       <td>${u.city || '—'}</td>
       <td>
-        <select class="select-status" onchange="changeRole('${u.id}',this.value,'${u.city||''}')" style="min-width:110px">
+        <select class="select-status" onchange="changeRole('${u.id}',this.value,'${u.city||''}','${u.driverFromCity||''}','${u.driverToCity||''}')" style="min-width:120px">
           <option value="BUYER"  ${u.role==='BUYER' ?'selected':''}>Харидор</option>
           <option value="SELLER" ${u.role==='SELLER'?'selected':''}>Фурушанда</option>
+          <option value="BOTH"   ${u.role==='BOTH'  ?'selected':''}>Ҳарду</option>
+          <option value="DRIVER" ${u.role==='DRIVER'?'selected':''}>🚕 Ронанда</option>
         </select>
       </td>
       <td>${u._count.products}</td>
@@ -1420,34 +1447,55 @@ const ALL_CITIES = [
 ].sort((a,b)=>a.city.localeCompare(b.city));
 
 let _roleModalId = null, _roleModalRole = null, _roleModalCity = null;
+let _driverFromCity = null, _driverToCity = null;
 
-function showRoleModal(id, role, currentCity) {
+function showRoleModal(id, role, currentCity, fromCity, toCity) {
   _roleModalId = id; _roleModalRole = role; _roleModalCity = currentCity || null;
+  _driverFromCity = fromCity || null; _driverToCity = toCity || null;
   const el = document.getElementById('roleModal');
   el.classList.add('open');
-  document.getElementById('roleCitySearch').value = '';
-  renderRoleCities('');
-  // pre-select current city
-  if (currentCity) {
-    document.querySelectorAll('#roleCityList .rc-item').forEach(i => {
-      if (i.dataset.city === currentCity) i.classList.add('selected');
-    });
+  const isDriver = role === 'DRIVER';
+  document.getElementById('roleCitySection').style.display = isDriver ? 'none' : 'block';
+  document.getElementById('roleDriverSection').style.display = isDriver ? 'block' : 'none';
+  document.getElementById('roleModalTitle').textContent = isDriver ? '🚕 Ронанда таъин кардан' : '🏪 Фурушанда таъин кардан';
+  document.getElementById('roleModalSubtitle').textContent = isDriver ? 'Масири ронандаро интихоб кунед' : 'Шаҳри фурушандаро интихоб кунед (ихтиёрӣ)';
+  if (isDriver) {
+    document.getElementById('driverFromSearch').value = _driverFromCity || '';
+    document.getElementById('driverToSearch').value = _driverToCity || '';
+    renderDriverCities('from', _driverFromCity || '');
+    renderDriverCities('to', _driverToCity || '');
+  } else {
+    document.getElementById('roleCitySearch').value = '';
+    renderRoleCities('');
   }
 }
 
 function closeRoleModal() {
   document.getElementById('roleModal').classList.remove('open');
-  _roleModalId = _roleModalRole = _roleModalCity = null;
+  _roleModalId = _roleModalRole = _roleModalCity = _driverFromCity = _driverToCity = null;
 }
 
 function renderRoleCities(q) {
   const list = document.getElementById('roleCityList');
   const filtered = q ? ALL_CITIES.filter(c=>c.city.toLowerCase().includes(q.toLowerCase())) : ALL_CITIES;
   list.innerHTML = filtered.map(c=>`
-    <div class="rc-item ${_roleModalCity===c.city?'selected':''}" data-city="${c.city}" data-region="${c.region}" onclick="selectRoleCity(this,'${c.city}')">
+    <div class="rc-item ${_roleModalCity===c.city?'selected':''}" data-city="${c.city}" onclick="selectRoleCity(this,'${c.city}')">
       <span style="color:#999;font-size:13px">📍</span> ${c.city}
       <span style="margin-left:auto;font-size:11px;color:#999">${c.region}</span>
       ${_roleModalCity===c.city?'<span style="color:var(--primary);margin-left:6px">✓</span>':''}
+    </div>`).join('');
+}
+
+function renderDriverCities(side, q) {
+  const listId = side === 'from' ? 'driverFromList' : 'driverToList';
+  const selected = side === 'from' ? _driverFromCity : _driverToCity;
+  const list = document.getElementById(listId);
+  const filtered = q ? ALL_CITIES.filter(c=>c.city.toLowerCase().includes(q.toLowerCase())) : ALL_CITIES;
+  list.innerHTML = filtered.map(c=>`
+    <div class="rc-item ${selected===c.city?'selected':''}" data-city="${c.city}" onclick="selectDriverCity('${side}',this,'${c.city}')">
+      <span style="color:#999;font-size:13px">📍</span> ${c.city}
+      <span style="margin-left:auto;font-size:11px;color:#999">${c.region}</span>
+      ${selected===c.city?'<span style="color:var(--primary);margin-left:6px">✓</span>':''}
     </div>`).join('');
 }
 
@@ -1457,32 +1505,42 @@ function selectRoleCity(el, city) {
   el.classList.add('selected');
 }
 
+function selectDriverCity(side, el, city) {
+  if (side === 'from') { _driverFromCity = city; document.querySelectorAll('#driverFromList .rc-item').forEach(i=>i.classList.remove('selected')); }
+  else { _driverToCity = city; document.querySelectorAll('#driverToList .rc-item').forEach(i=>i.classList.remove('selected')); }
+  el.classList.add('selected');
+}
+
 async function confirmRoleChange() {
   if (!_roleModalId) return;
+  if (_roleModalRole === 'DRIVER' && (!_driverFromCity || !_driverToCity)) {
+    showToast('Ҳарду шаҳрро интихоб кунед', 'error'); return;
+  }
   const btn = document.getElementById('roleConfirmBtn');
   btn.disabled = true; btn.textContent = 'Сабт мешавад…';
   const body = { role: _roleModalRole };
-  if (_roleModalCity) body.city = _roleModalCity;
+  if (_roleModalRole === 'DRIVER') { body.fromCity = _driverFromCity; body.toCity = _driverToCity; }
+  else if (_roleModalCity) { body.city = _roleModalCity; }
   const d = await api(`/users/${_roleModalId}/role`, { method: 'PATCH', body: JSON.stringify(body) });
   btn.disabled = false; btn.textContent = 'Тасдиқ кардан';
   closeRoleModal();
   if (d?.success) {
-    const label = _roleModalRole === 'SELLER' ? 'Фурушанда' : 'Харидор';
-    showToast(`${d.data.name} — ${label} шуд ✓`, 'success');
+    const labels = { SELLER: 'Фурушанда', BUYER: 'Харидор', BOTH: 'Ҳарду', DRIVER: 'Ронанда' };
+    showToast(`${d.data.name} — ${labels[_roleModalRole] || _roleModalRole} шуд ✓`, 'success');
     loadUsers();
   } else {
     showToast(d?.message || 'Хато', 'error');
   }
 }
 
-async function changeRole(id, role, currentCity) {
-  if (role === 'SELLER') {
-    showRoleModal(id, role, currentCity);
+async function changeRole(id, role, currentCity, fromCity, toCity) {
+  if (role === 'SELLER' || role === 'DRIVER') {
+    showRoleModal(id, role, currentCity, fromCity, toCity);
   } else {
-    // BUYER — directly update without city picker
     const d = await api(`/users/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) });
     if (d?.success) {
-      showToast(`${d.data.name} — Харидор шуд`, 'success');
+      const labels = { BUYER: 'Харидор', BOTH: 'Ҳарду' };
+      showToast(`${d.data.name} — ${labels[role] || role} шуд`, 'success');
       loadUsers();
     } else {
       showToast(d?.message || 'Хато', 'error');

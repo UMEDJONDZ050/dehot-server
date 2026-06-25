@@ -30,7 +30,7 @@ const getUsers = async (req, res) => {
   if (role === 'SELLER') where.role = { in: ['SELLER', 'BOTH'] };
   if (role === 'BUYER')  where.role = { in: ['BUYER',  'BOTH'] };
   const [users, total] = await Promise.all([
-    prisma.user.findMany({ where, skip, take: Number(limit), orderBy: { createdAt: 'desc' }, select: { id: true, name: true, phone: true, city: true, role: true, isVerified: true, isActive: true, createdAt: true, _count: { select: { products: true } } } }),
+    prisma.user.findMany({ where, skip, take: Number(limit), orderBy: { createdAt: 'desc' }, select: { id: true, name: true, phone: true, city: true, role: true, driverFromCity: true, driverToCity: true, isVerified: true, isActive: true, createdAt: true, _count: { select: { products: true } } } }),
     prisma.user.count({ where }),
   ]);
   res.json({ success: true, data: users, meta: { total, page: Number(page), limit: Number(limit) } });
@@ -38,29 +38,37 @@ const getUsers = async (req, res) => {
 
 const updateUserRole = async (req, res, next) => {
   try {
-    const { role, city } = req.body;
-    if (!['BUYER', 'SELLER', 'BOTH'].includes(role)) return res.status(400).json({ success: false, message: 'Рол нодуруст аст' });
+    const { role, city, fromCity, toCity } = req.body;
+    if (!['BUYER', 'SELLER', 'BOTH', 'DRIVER'].includes(role)) return res.status(400).json({ success: false, message: 'Рол нодуруст аст' });
+    if (role === 'DRIVER' && (!fromCity || !toCity)) return res.status(400).json({ success: false, message: 'Барои ронанда fromCity ва toCity лозиманд' });
     const user = await prisma.user.findUnique({ where: { id: req.params.id }, select: { id: true, name: true, phone: true, role: true, fcmToken: true } });
     if (!user) return res.status(404).json({ success: false, message: 'Ёфт нашуд' });
-    const updated = await prisma.user.update({ where: { id: req.params.id }, data: { role, ...(city ? { city } : {}) }, select: { id: true, name: true, phone: true, role: true, city: true } });
-    const isSeller  = role === 'SELLER' || role === 'BOTH';
-    const wasSeller = user.role === 'SELLER' || user.role === 'BOTH';
-    if (isSeller !== wasSeller) {
-      const { ensureAdminUser } = require('./chat.controller');
-      const admin = await ensureAdminUser();
-      const msgText = isSeller
+    const updateData = { role, ...(city ? { city } : {}) };
+    if (role === 'DRIVER') { updateData.driverFromCity = fromCity; updateData.driverToCity = toCity; }
+    const updated = await prisma.user.update({ where: { id: req.params.id }, data: updateData, select: { id: true, name: true, phone: true, role: true, city: true, driverFromCity: true, driverToCity: true } });
+    // Огоҳии корбар
+    const { ensureAdminUser } = require('./chat.controller');
+    const admin = await ensureAdminUser();
+    let msgText;
+    if (role === 'DRIVER') {
+      msgText = `🚕 Табрик! Шумо ронандаи DEHOT шудед!\n\nМасири шумо: ${fromCity} ↔ ${toCity}\n\nДар барнома тугмаи «+»-ро зер кунед ва вазъияти худро фаъол кунед то мусофирон шуморо бибинанд.`;
+    } else {
+      const isSeller = role === 'SELLER' || role === 'BOTH';
+      const wasSeller = user.role === 'SELLER' || user.role === 'BOTH';
+      if (isSeller === wasSeller && user.role !== 'DRIVER') { return res.json({ success: true, data: updated }); }
+      msgText = isSeller
         ? `🎉 Табрик! Шумо дар барномаи DEHOT фурушанда шудед!\n\nАкнун шумо метавонед молу маҳсулоти худро ба фурӯш гузоред.\n\n⚠️ Диққат: Шумо танҳо молу маҳсулоти кишоварзӣ метавонед элон гузоред.\n\nБарои илова кардани элон тугмаи «+» дар поёни барномаро истифода баред. Барори кор!`
-        : `Шумо дар барномаи DEHOT ҳоло харидор ҳастед. Агар боз фурушанда шудан хоҳед, бо мо тавассути WhatsApp тамос гиред.`;
-      let chat = await prisma.chat.findFirst({ where: { buyerId: user.id, sellerId: admin.id } });
-      if (!chat) chat = await prisma.chat.create({ data: { buyerId: user.id, sellerId: admin.id } });
-      await prisma.$transaction([
-        prisma.message.create({ data: { chatId: chat.id, senderId: admin.id, text: msgText } }),
-        prisma.chat.update({ where: { id: chat.id }, data: { updatedAt: new Date() } }),
-      ]);
-      if (user.fcmToken) {
-        const pushTitle = isSeller ? '🎉 Шумо фурушанда шудед!' : 'Нақши шумо тағйир ёфт';
-        await sendPush([user.fcmToken], pushTitle, isSeller ? 'Табрик! Шумо фурушанда шудед.' : 'Нақши шумо ба харидор тағйир ёфт.');
-      }
+        : `Шумо дар барномаи DEHOT ҳоло харидор ҳастед.`;
+    }
+    let chat = await prisma.chat.findFirst({ where: { buyerId: user.id, sellerId: admin.id } });
+    if (!chat) chat = await prisma.chat.create({ data: { buyerId: user.id, sellerId: admin.id } });
+    await prisma.$transaction([
+      prisma.message.create({ data: { chatId: chat.id, senderId: admin.id, text: msgText } }),
+      prisma.chat.update({ where: { id: chat.id }, data: { updatedAt: new Date() } }),
+    ]);
+    if (user.fcmToken) {
+      const pushTitle = role === 'DRIVER' ? '🚕 Шумо ронанда шудед!' : (role === 'SELLER' || role === 'BOTH') ? '🎉 Шумо фурушанда шудед!' : 'Нақши шумо тағйир ёфт';
+      await sendPush([user.fcmToken], pushTitle, msgText.split('\n')[0]);
     }
     res.json({ success: true, data: updated });
   } catch (err) { next(err); }

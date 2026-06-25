@@ -28,7 +28,7 @@ const getProducts = async (req, res, next) => {
     if (isFresh   === 'true') where.isFresh   = true;
     const andConditions = [];
     if (search) andConditions.push({ OR: [{ title: { contains: search, mode: 'insensitive' } }, { description: { contains: search, mode: 'insensitive' } }] });
-    if (region) andConditions.push({ OR: [{ region: { contains: region, mode: 'insensitive' } }, { district: { contains: region, mode: 'insensitive' } }, { location: { contains: region, mode: 'insensitive' } }] });
+    if (region) andConditions.push({ OR: [{ region: { equals: region, mode: 'insensitive' } }, { district: { equals: region, mode: 'insensitive' } }, { location: { equals: region, mode: 'insensitive' } }] });
     if (andConditions.length) where.AND = andConditions;
     const [products, total] = await Promise.all([
       prisma.product.findMany({ where, select: productSelect, skip, take: Number(limit), orderBy: { [sortBy]: order } }),
@@ -145,7 +145,7 @@ const getFeed = async (req, res, next) => {
     const pageNum = Number(page), limitNum = Number(limit);
     const where = { status: 'ACTIVE' };
     if (hasWholesale === 'true') where.wholesaleTiers = { some: {} };
-    if (region) where.OR = [{ region: { contains: region, mode: 'insensitive' } }, { district: { contains: region, mode: 'insensitive' } }, { location: { contains: region, mode: 'insensitive' } }];
+    if (region) where.OR = [{ region: { equals: region, mode: 'insensitive' } }, { district: { equals: region, mode: 'insensitive' } }, { location: { equals: region, mode: 'insensitive' } }];
     const pool = await prisma.product.findMany({ where, select: productSelect, take: 500, orderBy: { createdAt: 'desc' } });
     const total = await prisma.product.count({ where });
     if (pool.length === 0) return res.json({ success: true, data: [], meta: { total: 0, page: pageNum, limit: limitNum, pages: 0 } });

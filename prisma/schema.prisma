@@ -17,7 +17,9 @@ model User {
   city        String?
   district    String?
   region      String?
-  role        UserRole  @default(BOTH)
+  role            UserRole  @default(BOTH)
+  driverFromCity  String?
+  driverToCity    String?
   latitude    Float?
   longitude   Float?
   fcmToken    String?
@@ -32,6 +34,7 @@ model User {
   chatsAsBuyer    Chat[]      @relation("BuyerChats")
   chatsAsSeller   Chat[]      @relation("SellerChats")
   complaints      Complaint[]
+  taxiListings    TaxiListing[]
 
   @@map("users")
 }
@@ -40,6 +43,22 @@ enum UserRole {
   BUYER
   SELLER
   BOTH
+  DRIVER
+}
+
+model TaxiListing {
+  id          String   @id @default(uuid())
+  driverId    String
+  fromCity    String
+  toCity      String
+  seats       Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  driver      User     @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  @@map("taxi_listings")
 }
 
 model Category {
