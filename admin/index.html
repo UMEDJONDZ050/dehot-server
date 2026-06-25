@@ -1108,42 +1108,47 @@
 
 <!-- Role + City Modal -->
 <div class="modal-overlay" id="roleModal">
-  <div class="modal" style="width:420px;max-height:90vh;display:flex;flex-direction:column">
-    <h4 id="roleModalTitle" style="margin-bottom:4px">🏪 Фурушанда таъин кардан</h4>
-    <p id="roleModalSubtitle" style="font-size:13px;color:var(--muted);margin-bottom:16px">Шаҳри фурушандаро интихоб кунед (ихтиёрӣ)</p>
+  <div class="modal" style="width:440px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;padding:24px">
+    <h4 id="roleModalTitle" style="margin:0 0 4px">🏪 Фурушанда таъин кардан</h4>
+    <div id="roleModalSubtitle" style="font-size:13px;color:var(--muted);margin-bottom:14px">Шаҳри фурушандаро интихоб кунед (ихтиёрӣ)</div>
 
-    <!-- Seller: city picker -->
-    <div id="roleCitySection">
-      <input id="roleCitySearch" type="text" placeholder="Ҷустуҷӯ…"
-        style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:10px"
-        oninput="renderRoleCities(this.value)"
-        onfocus="this.style.borderColor='var(--primary)'"
-        onblur="this.style.borderColor='var(--border)'" />
-      <div id="roleCityList"
-        style="flex:1;overflow-y:auto;max-height:260px;border:1px solid var(--border);border-radius:8px;background:var(--bg)"></div>
-    </div>
+    <!-- scrollable content area -->
+    <div style="flex:1;overflow-y:auto;min-height:0">
 
-    <!-- Driver: route picker -->
-    <div id="roleDriverSection" style="display:none">
-      <p style="font-size:13px;font-weight:600;margin-bottom:6px">Шаҳри аввал (аз куҷо)</p>
-      <input id="driverFromSearch" type="text" placeholder="Ҷустуҷӯ…"
-        style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:6px"
-        oninput="renderDriverCities('from',this.value)"
-        onfocus="this.style.borderColor='var(--primary)'"
-        onblur="this.style.borderColor='var(--border)'" />
-      <div id="driverFromList"
-        style="overflow-y:auto;max-height:160px;border:1px solid var(--border);border-radius:8px;background:var(--bg);margin-bottom:14px"></div>
-      <p style="font-size:13px;font-weight:600;margin-bottom:6px">Шаҳри дувум (ба куҷо)</p>
-      <input id="driverToSearch" type="text" placeholder="Ҷустуҷӯ…"
-        style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:6px"
-        oninput="renderDriverCities('to',this.value)"
-        onfocus="this.style.borderColor='var(--primary)'"
-        onblur="this.style.borderColor='var(--border)'" />
-      <div id="driverToList"
-        style="overflow-y:auto;max-height:160px;border:1px solid var(--border);border-radius:8px;background:var(--bg)"></div>
-    </div>
+      <!-- Seller: city picker -->
+      <div id="roleCitySection">
+        <input id="roleCitySearch" type="text" placeholder="Ҷустуҷӯ…"
+          style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:10px;box-sizing:border-box"
+          oninput="renderRoleCities(this.value)"
+          onfocus="this.style.borderColor='var(--primary)'"
+          onblur="this.style.borderColor='var(--border)'" />
+        <div id="roleCityList"
+          style="overflow-y:auto;max-height:300px;border:1px solid var(--border);border-radius:8px;background:var(--bg)"></div>
+      </div>
 
-    <div style="display:flex;gap:10px;margin-top:14px">
+      <!-- Driver: route picker -->
+      <div id="roleDriverSection" style="display:none">
+        <div style="font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text)">📍 Аз куҷо</div>
+        <input id="driverFromSearch" type="text" placeholder="Ҷустуҷӯ…"
+          style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:6px;box-sizing:border-box"
+          oninput="renderDriverCities('from',this.value)"
+          onfocus="this.style.borderColor='var(--primary)'"
+          onblur="this.style.borderColor='var(--border)'" />
+        <div id="driverFromList"
+          style="overflow-y:auto;max-height:150px;border:1px solid var(--border);border-radius:8px;background:var(--bg);margin-bottom:16px"></div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text)">🏁 Ба куҷо</div>
+        <input id="driverToSearch" type="text" placeholder="Ҷустуҷӯ…"
+          style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:6px;box-sizing:border-box"
+          oninput="renderDriverCities('to',this.value)"
+          onfocus="this.style.borderColor='var(--primary)'"
+          onblur="this.style.borderColor='var(--border)'" />
+        <div id="driverToList"
+          style="overflow-y:auto;max-height:150px;border:1px solid var(--border);border-radius:8px;background:var(--bg)"></div>
+      </div>
+
+    </div><!-- end scroll area -->
+
+    <div style="display:flex;gap:10px;margin-top:14px;flex-shrink:0">
       <button onclick="closeRoleModal()"
         style="flex:1;padding:10px;border:1.5px solid var(--border);background:white;border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px">Бекор</button>
       <button id="roleConfirmBtn" onclick="confirmRoleChange()"
@@ -1521,12 +1526,14 @@ async function confirmRoleChange() {
   const body = { role: _roleModalRole };
   if (_roleModalRole === 'DRIVER') { body.fromCity = _driverFromCity; body.toCity = _driverToCity; }
   else if (_roleModalCity) { body.city = _roleModalCity; }
+  // save before close (closeRoleModal nullifies them)
+  const savedRole = _roleModalRole;
   const d = await api(`/users/${_roleModalId}/role`, { method: 'PATCH', body: JSON.stringify(body) });
   btn.disabled = false; btn.textContent = 'Тасдиқ кардан';
   closeRoleModal();
   if (d?.success) {
     const labels = { SELLER: 'Фурушанда', BUYER: 'Харидор', BOTH: 'Ҳарду', DRIVER: 'Ронанда' };
-    showToast(`${d.data.name} — ${labels[_roleModalRole] || _roleModalRole} шуд ✓`, 'success');
+    showToast(`${d.data.name} — ${labels[savedRole] || savedRole} шуд ✓`, 'success');
     loadUsers();
   } else {
     showToast(d?.message || 'Хато', 'error');
