@@ -123,4 +123,18 @@ const saveFcmToken = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-module.exports = { register, login, getMe, phoneAuth, updateMe, saveFcmToken };
+const updateAvatar = async (req, res, next) => {
+  try {
+    if (!req.file) return res.status(400).json({ success: false, message: 'Акс нест' });
+    const { uploadToR2 } = require('../config/r2');
+    const url = await uploadToR2(req.file.buffer, req.file.originalname, 'avatars', req.file.mimetype);
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data: { avatar: url },
+      select: { id: true, phone: true, name: true, avatar: true, bio: true, city: true, region: true, role: true, driverFromCity: true, driverToCity: true, isVerified: true, createdAt: true, _count: { select: { products: true, favorites: true } } },
+    });
+    res.json({ success: true, user });
+  } catch (err) { next(err); }
+};
+
+module.exports = { register, login, getMe, phoneAuth, updateMe, saveFcmToken, updateAvatar };
