@@ -70,7 +70,7 @@ const getMe = async (req, res, next) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
-      select: { id: true, phone: true, name: true, avatar: true, bio: true, city: true, region: true, role: true, isVerified: true, createdAt: true, _count: { select: { products: true, favorites: true } } },
+      select: { id: true, phone: true, name: true, avatar: true, bio: true, city: true, region: true, role: true, driverFromCity: true, driverToCity: true, isVerified: true, createdAt: true, _count: { select: { products: true, favorites: true } } },
     });
     res.json({ success: true, user });
   } catch (err) { next(err); }
@@ -108,7 +108,7 @@ const updateMe = async (req, res, next) => {
         ...(latitude  !== undefined && latitude  !== null && { latitude:  Number(latitude) }),
         ...(longitude !== undefined && longitude !== null && { longitude: Number(longitude) }),
       },
-      select: { id: true, phone: true, name: true, avatar: true, bio: true, city: true, region: true, role: true, isVerified: true, createdAt: true, _count: { select: { products: true } } },
+      select: { id: true, phone: true, name: true, avatar: true, bio: true, city: true, region: true, role: true, driverFromCity: true, driverToCity: true, isVerified: true, createdAt: true, _count: { select: { products: true } } },
     });
     res.json({ success: true, user: updated });
   } catch (err) { next(err); }
