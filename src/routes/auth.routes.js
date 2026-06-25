@@ -8,7 +8,9 @@ const avatarUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_, file, cb) => {
-    cb(null, /jpeg|jpg|png|webp/.test(path.extname(file.originalname).toLowerCase()));
+    const okMime = /^image\/(jpeg|jpg|png|webp)$/.test(file.mimetype);
+    const okExt  = /jpeg|jpg|png|webp/.test(path.extname(file.originalname).toLowerCase());
+    cb(null, okMime || okExt);
   },
 });
 
