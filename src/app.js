@@ -9,12 +9,7 @@ initFCM();
 const { startAiScanner } = require('./lib/aiScanner');
 startAiScanner();
 
-// Бехатарона columnҳои навро месозад (агар вуҷуд надошта бошанд)
 const prisma = require('./config/database');
-prisma.$executeRawUnsafe(`
-  ALTER TABLE "taxi_listings" ADD COLUMN IF NOT EXISTS "expiresAt" TIMESTAMP(3);
-  ALTER TABLE "users" ALTER COLUMN "role" SET DEFAULT 'BUYER';
-`).catch(() => {});
 
 const authRoutes     = require('./routes/auth.routes');
 const productRoutes  = require('./routes/product.routes');
@@ -30,7 +25,6 @@ const errorHandler   = require('./middleware/errorHandler');
 
 const app = express();
 
-// Render/Cloudflare кор бо proxy мекунанд — барои req.ip-и дуруст лозим аст
 app.set('trust proxy', 1);
 
 app.use(cors());
@@ -54,6 +48,12 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// Schema changes must complete before accepting traffic
+(async () => {
+  try { await prisma.$executeRawUnsafe(`ALTER TABLE "taxi_listings" ADD COLUMN IF NOT EXISTS "expiresAt" TIMESTAMP(3)`); } catch (_) {}
+  try { await prisma.$executeRawUnsafe(`ALTER TABLE "users" ALTER COLUMN "role" SET DEFAULT 'BUYER'`); } catch (_) {}
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+})();
 
 module.exports = app;
