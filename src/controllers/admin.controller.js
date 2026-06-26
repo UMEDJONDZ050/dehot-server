@@ -28,7 +28,8 @@ const getUsers = async (req, res) => {
   const where = {};
   if (search) where.OR = [{ name: { contains: search, mode: 'insensitive' } }, { phone: { contains: search } }];
   if (role === 'SELLER') where.role = { in: ['SELLER', 'BOTH'] };
-  if (role === 'BUYER')  where.role = { in: ['BUYER',  'BOTH'] };
+  if (role === 'BUYER')  where.role = { in: ['BUYER', 'BOTH'] };
+  if (role === 'DRIVER') where.role = 'DRIVER';
   const [users, total] = await Promise.all([
     prisma.user.findMany({ where, skip, take: Number(limit), orderBy: { createdAt: 'desc' }, select: { id: true, name: true, phone: true, city: true, role: true, driverFromCity: true, driverToCity: true, isVerified: true, isActive: true, createdAt: true, _count: { select: { products: true } } } }),
     prisma.user.count({ where }),

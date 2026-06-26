@@ -936,9 +936,10 @@
           </div>
           <!-- Role filter tabs -->
           <div style="display:flex;gap:8px;padding:0 20px 14px;border-bottom:1px solid var(--border)">
-            <button class="role-tab active" id="rtab-all"     onclick="setRoleFilter('all',   this)">👥 Ҳама</button>
+            <button class="role-tab active" id="rtab-all"     onclick="setRoleFilter('all',    this)">👥 Ҳама</button>
             <button class="role-tab"        id="rtab-sellers" onclick="setRoleFilter('SELLER', this)">🏪 Фурушандагон</button>
-            <button class="role-tab"        id="rtab-buyers"  onclick="setRoleFilter('BUYER',  this)">🛒 Харидорон</button>
+            <button class="role-tab"        id="rtab-drivers" onclick="setRoleFilter('DRIVER', this)">🚕 Ронандагон</button>
+            <button class="role-tab"        id="rtab-buyers"  onclick="setRoleFilter('BUYER',  this)">👤 Оддӣ</button>
           </div>
           <div id="usersTableWrap"><div class="loading">Бор мешавад…</div></div>
           <div class="pagination" id="usersPager" style="display:none">
@@ -1390,7 +1391,7 @@ function setRoleFilter(role, el) {
   _usersRoleFilter = role;
   document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  const titles = { all: 'Ҳамаи корбарон', SELLER: 'Фурушандагон', BUYER: 'Харидорон' };
+  const titles = { all: 'Ҳамаи корбарон', SELLER: 'Фурушандагон', DRIVER: 'Ронандагон', BUYER: 'Оддӣ' };
   document.getElementById('usersTitle').textContent = titles[role];
   usersPage = 1;
   loadUsers();
@@ -1682,7 +1683,7 @@ function fmtDate(iso) {
 }
 
 function roleLabel(r) {
-  return r === 'SELLER' ? 'Фурӯшанда' : r === 'BUYER' ? 'Харидор' : 'Ҳарду';
+  return { SELLER: 'Фурушанда', DRIVER: '🚕 Ронанда', BUYER: 'Оддӣ', BOTH: 'Оддӣ' }[r] || 'Оддӣ';
 }
 
 function statusLabel(s) {
