@@ -9,6 +9,13 @@ initFCM();
 const { startAiScanner } = require('./lib/aiScanner');
 startAiScanner();
 
+// Бехатарона columnҳои навро месозад (агар вуҷуд надошта бошанд)
+const prisma = require('./config/database');
+prisma.$executeRawUnsafe(`
+  ALTER TABLE "taxi_listings" ADD COLUMN IF NOT EXISTS "expiresAt" TIMESTAMP(3);
+  ALTER TABLE "users" ALTER COLUMN "role" SET DEFAULT 'BUYER';
+`).catch(() => {});
+
 const authRoutes     = require('./routes/auth.routes');
 const productRoutes  = require('./routes/product.routes');
 const categoryRoutes = require('./routes/category.routes');
