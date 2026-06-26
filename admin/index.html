@@ -1412,9 +1412,8 @@ async function loadUsers(page) {
       <td>${u.city || '—'}</td>
       <td>
         <select class="select-status" onchange="changeRole('${u.id}',this.value,'${u.city||''}','${u.driverFromCity||''}','${u.driverToCity||''}')" style="min-width:120px">
-          <option value="BUYER"  ${u.role==='BUYER' ?'selected':''}>Харидор</option>
+          <option value="BUYER"  ${u.role==='BUYER'||u.role==='BOTH'?'selected':''}>Оддӣ</option>
           <option value="SELLER" ${u.role==='SELLER'?'selected':''}>Фурушанда</option>
-          <option value="BOTH"   ${u.role==='BOTH'  ?'selected':''}>Ҳарду</option>
           <option value="DRIVER" ${u.role==='DRIVER'?'selected':''}>🚕 Ронанда</option>
         </select>
       </td>
@@ -1532,7 +1531,7 @@ async function confirmRoleChange() {
   btn.disabled = false; btn.textContent = 'Тасдиқ кардан';
   closeRoleModal();
   if (d?.success) {
-    const labels = { SELLER: 'Фурушанда', BUYER: 'Харидор', BOTH: 'Ҳарду', DRIVER: 'Ронанда' };
+    const labels = { SELLER: 'Фурушанда', BUYER: 'Оддӣ', DRIVER: 'Ронанда' };
     showToast(`${d.data.name} — ${labels[savedRole] || savedRole} шуд ✓`, 'success');
     loadUsers();
   } else {
@@ -1546,8 +1545,7 @@ async function changeRole(id, role, currentCity, fromCity, toCity) {
   } else {
     const d = await api(`/users/${id}/role`, { method: 'PATCH', body: JSON.stringify({ role }) });
     if (d?.success) {
-      const labels = { BUYER: 'Харидор', BOTH: 'Ҳарду' };
-      showToast(`${d.data.name} — ${labels[role] || role} шуд`, 'success');
+      showToast(`${d.data.name} — Оддӣ шуд`, 'success');
       loadUsers();
     } else {
       showToast(d?.message || 'Хато', 'error');

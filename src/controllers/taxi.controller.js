@@ -5,11 +5,12 @@ const driverSelect = {
   driverFromCity: true, driverToCity: true,
 };
 
-// GET /api/taxi — рӯйхати такси фаол
+// GET /api/taxi — рӯйхати такси фаол (танҳо мӯҳлаташ нагузаштааст)
 const getListings = async (req, res, next) => {
   try {
+    const now = new Date();
     const listings = await prisma.taxiListing.findMany({
-      where: { isActive: true },
+      where: { isActive: true, expiresAt: { gt: now } },
       include: { driver: { select: driverSelect } },
       orderBy: { updatedAt: 'desc' },
     });
@@ -32,15 +33,16 @@ const activate = async (req, res, next) => {
       where: { driverId: req.user.id },
     });
     let listing;
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 соат
     if (existing) {
       listing = await prisma.taxiListing.update({
         where: { id: existing.id },
-        data: { fromCity, toCity, seats: Number(seats), isActive: true, updatedAt: new Date() },
+        data: { fromCity, toCity, seats: Number(seats), isActive: true, expiresAt, updatedAt: new Date() },
         include: { driver: { select: driverSelect } },
       });
     } else {
       listing = await prisma.taxiListing.create({
-        data: { driverId: req.user.id, fromCity, toCity, seats: Number(seats), isActive: true },
+        data: { driverId: req.user.id, fromCity, toCity, seats: Number(seats), isActive: true, expiresAt },
         include: { driver: { select: driverSelect } },
       });
     }
